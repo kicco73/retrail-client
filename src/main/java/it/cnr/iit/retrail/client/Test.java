@@ -25,7 +25,13 @@ public class Test {
                 PepRequestAttribute.CATEGORIES.RESOURCE);
         accessRequest.add(attribute);
         
-        boolean result = client.tryAccess(accessRequest);
+        boolean result;
+        
+        result = client.tryAccess(accessRequest);
         System.out.println("tryAccess = " + result);
+
+        client.startAccess(accessRequest);
+        System.out.println("startAccess = " + result);
+
     }
 }
