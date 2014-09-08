@@ -5,6 +5,7 @@ package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.DomUtils;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
+import it.cnr.iit.retrail.commons.PepAccessResponse;
 import it.cnr.iit.retrail.commons.Server;
 import java.io.IOException;
 import java.net.URL;
@@ -46,23 +47,20 @@ public class PEP extends Server {
     public boolean tryAccess(PepAccessRequest req) throws Exception {
         Object[] params = new Object[]{req.toElement()};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
-        System.out.println("HO OTTENUTO IL SEGUENTE:");
-        DomUtils.write(doc.getDocumentElement());
-        String decision = doc.getElementsByTagName("Decision").item(0).getTextContent();
+        PepAccessResponse response = new PepAccessResponse(doc);
         boolean result = false;
-        switch(decision) {
+        switch(response.decision) {
             default:
                 DomUtils.write(doc);
                 break;
-            case "Indeterminate": {
+            case Indeterminate:
                 String statusMessage = doc.getElementsByTagName("StatusMessage").item(0).getTextContent();
-                System.out.println("RISULTATO INDETERMINATO: "+statusMessage);
+                System.out.println("RISULTATO INDETERMINATO: "+response.message);
                 break;
-            }
-            case "Permit":
+            case Permit:
                 result = true;
                 break;
-            case "Deny":
+            case Deny:
                 result = false;
                 break;
         }
