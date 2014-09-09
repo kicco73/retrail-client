@@ -6,6 +6,7 @@ package it.cnr.iit.retrail.client;
 import it.cnr.iit.retrail.commons.DomUtils;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepAccessResponse;
+import it.cnr.iit.retrail.commons.PepSession;
 import it.cnr.iit.retrail.commons.Server;
 import java.io.IOException;
 import java.net.URL;
@@ -67,15 +68,15 @@ public class PEP extends Server {
         return result;
     }
     
-    public PepAccessResponse startAccess(PepAccessRequest req) throws Exception {
+    public PepSession startAccess(PepAccessRequest req) throws Exception {
         Object[] params = new Object[]{req.toElement()};
         Document doc = (Document) client.execute("UCon.startAccess", params);
-        PepAccessResponse response = new PepAccessResponse(doc);
+        PepSession response = new PepSession(doc);
         return response;
     }
         
-    public void endAccess(PepAccessResponse session) throws Exception {
-        Object[] params = new Object[]{session.sessionId};
+    public void endAccess(PepSession session) throws Exception {
+        Object[] params = new Object[]{session.getId()};
         client.execute("UCon.endAccess", params);
     }
 
