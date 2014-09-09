@@ -3,6 +3,7 @@
 package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.PepAccessRequest;
+import it.cnr.iit.retrail.commons.PepAccessResponse;
 import it.cnr.iit.retrail.commons.PepRequestAttribute;
 import java.net.URL;
 
@@ -30,8 +31,14 @@ public class Test {
         result = client.tryAccess(accessRequest);
         System.out.println("tryAccess = " + result);
 
-        client.startAccess(accessRequest);
-        System.out.println("startAccess = " + result);
-
+        PepAccessResponse session1 = client.startAccess(accessRequest);
+        System.out.println("startAccess = " + session1 + ", sessionId = "+session1.sessionId);
+        PepAccessResponse session2 = client.startAccess(accessRequest);
+        System.out.println("startAccess = " + session2 + ", sessionId = "+session2.sessionId);
+        System.out.println("endAccess = " +session1.sessionId);
+        client.endAccess(session1);
+        System.out.println("endAccess = " +session2.sessionId);
+        client.endAccess(session2);
+        
     }
 }

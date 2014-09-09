@@ -67,13 +67,15 @@ public class PEP extends Server {
         return result;
     }
     
-    public void startAccess(PepAccessRequest req) throws Exception {
+    public PepAccessResponse startAccess(PepAccessRequest req) throws Exception {
         Object[] params = new Object[]{req.toElement()};
-        client.execute("UCon.startAccess", params);
+        Document doc = (Document) client.execute("UCon.startAccess", params);
+        PepAccessResponse response = new PepAccessResponse(doc);
+        return response;
     }
         
-    public void endAccess(PepAccessRequest req) throws Exception {
-        Object[] params = new Object[]{req.toElement()};
+    public void endAccess(PepAccessResponse session) throws Exception {
+        Object[] params = new Object[]{session.sessionId};
         client.execute("UCon.endAccess", params);
     }
 
