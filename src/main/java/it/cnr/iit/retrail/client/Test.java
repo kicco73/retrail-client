@@ -13,6 +13,7 @@ public class Test {
         URL pdpUrl = new URL("http://localhost:8080");
         URL myUrl = new URL("http://localhost:8081");
         PEP client = new PEP(pdpUrl, myUrl);
+        client.init();
         PepAccessRequest accessRequest = PepAccessRequest.newInstance(
                 "fedoraRole", 
                 "urn:fedora:names:fedora:2.1:action:id-getDatastreamDissemination", 
@@ -28,16 +29,16 @@ public class Test {
         
         boolean result;
         
-        result = client.tryAccess(accessRequest);
-        System.out.println("tryAccess = " + result);
+        //result = client.tryAccess(accessRequest);
+        //System.out.println("tryAccess = " + result);
 
         PepSession session1 = client.startAccess(accessRequest);
         System.out.println("startAccess = " + session1 + ", sessionId = "+session1.getId());
-        PepSession session2 = client.startAccess(accessRequest);
-        System.out.println("startAccess = " + session2 + ", sessionId = "+session2.getId());
-        System.out.println("endAccess = " +session1.getId());
-        client.endAccess(session1);
-        System.out.println("endAccess = " +session2.getId());
-        client.endAccess(session2);
+        //PepSession session2 = client.startAccess(accessRequest);
+        //System.out.println("startAccess = " + session2 + ", sessionId = "+session2.getId());
+        //System.out.println("endAccess = " +session1.getId());
+        //client.endAccess(session1);
+        //System.out.println("endAccess = " +session2.getId());
+        //client.endAccess(session2);
     }
 }
