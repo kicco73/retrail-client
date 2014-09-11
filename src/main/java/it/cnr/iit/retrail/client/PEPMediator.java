@@ -1,0 +1,57 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package it.cnr.iit.retrail.client;
+
+import it.cnr.iit.retrail.commons.PepSession;
+import java.util.ArrayList;
+import java.util.Collection;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+/**
+ * Handles events from the APIs exposed by the web server and dispatches them to
+ * the proper PEP instance. PEP instances must register by addListener() on
+ * creation in order for them to be dispatched async events.
+ *
+ * @author oneadmin
+ */
+public class PEPMediator implements API {
+
+    static private PEPMediator instance = null;
+    final private Collection<PEP> listeners = new ArrayList<>();
+
+    static PEPMediator getInstance() {
+        if (instance == null) 
+            instance = new PEPMediator();
+        return instance;
+    }
+
+    public synchronized void addListener(PEP listener) {
+        listeners.add(listener);
+    }
+
+    public synchronized void removeListener(PEP listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
+    public synchronized void revokeAccess(Node session) {
+        PepSession pepSession = new PepSession((Document) session);
+        boolean found = false;
+
+        for (PEP listener : listeners) 
+            if (found = listener.hasSession(pepSession)) {
+                listener.revokeAccess(pepSession);
+                break;
+            }
+        
+        if (!found) {
+            System.out.println("*** PEPMediator.revokeAccess("
+                    + pepSession + "): UNEXISTENT SESSION: " + pepSession);
+        }
+    }
+
+}
