@@ -11,11 +11,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,9 +26,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class PEP extends Server implements Runnable {
-
-    private static final int heartbeatPeriod = 15;
+public class PEP extends Server {
     private final XmlRpcClient client;
     private final Set<PepSession> sessions; 
     
@@ -59,10 +55,11 @@ public class PEP extends Server implements Runnable {
         client.setConfig(config);
     }
 
-    public void init() {        // start heartbeat
+    @Override
+    public void init() {
         // register myself to event mediator since API instances will send events to listeners
         PEPMediator.getInstance().addListener(this);
-        (new Thread(this)).start();
+        super.init();
     }
 
     public synchronized boolean hasSession(PepSession session) {
@@ -122,12 +119,13 @@ public class PEP extends Server implements Runnable {
         return (Node) client.execute("UCon.echo", params);
     }
 
-    private synchronized void heartbeat() throws ParserConfigurationException {
+    @Override
+    protected synchronized void heartbeat() {
         List<String> sessionsList = new ArrayList<>();
         for(PepSession s: sessions)
             sessionsList.add(s.getId());
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
-        Document doc = null;
+        Document doc;
         try {
             doc = (Document) client.execute("UCon.heartbeat", params);
             NodeList sessionList = doc.getElementsByTagName("Response");
@@ -148,21 +146,9 @@ public class PEP extends Server implements Runnable {
                     System.out.println("PEP.heartbeat(): OK -- no changes (sessions: "+sessions.size()+")");
         } catch (XmlRpcException ex) {
             Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                heartbeat();
-                Thread.sleep(heartbeatPeriod * 1000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
-                return;
-            } catch (ParserConfigurationException ex) {
-                Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 }
