@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -56,7 +54,7 @@ public class PEP extends Server {
     }
 
     @Override
-    public void init() {
+    public void init() throws IOException {
         // register myself to event mediator since API instances will send events to listeners
         PEPMediator.getInstance().addListener(this);
         super.init();
@@ -70,22 +68,7 @@ public class PEP extends Server {
         Object[] params = new Object[]{req.toElement()};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepAccessResponse response = new PepAccessResponse(doc);
-        boolean result = false;
-        switch (response.decision) {
-            default:
-                DomUtils.write(doc);
-                break;
-            case Indeterminate:
-                String statusMessage = doc.getElementsByTagName("StatusMessage").item(0).getTextContent();
-                System.out.println("RISULTATO INDETERMINATO: " + response.message);
-                break;
-            case Permit:
-                result = true;
-                break;
-            case Deny:
-                result = false;
-                break;
-        }
+        boolean result = response.decision == PepAccessResponse.DecisionEnum.Permit;
         return result;
     }
 
@@ -99,12 +82,12 @@ public class PEP extends Server {
     }
     
     public synchronized void recoverAccess(PepSession session) {
-        System.out.println("PEP.recoverAccess(): "+session);
+        log.info(""+session);
         sessions.add(session);
     }
     
     public synchronized void revokeAccess(PepSession session) {
-        System.out.println("PEP.revokeAccess(): "+session);
+        log.info(""+session);
         sessions.remove(session);
     }
 
@@ -135,19 +118,17 @@ public class PEP extends Server {
                 d.appendChild(e);
                 PepSession pepSession = new PepSession(d);
                 if(pepSession.decision != PepAccessResponse.DecisionEnum.Permit) {
-                    System.out.println("PEP.heartbeat(): emulating the revokation of "+pepSession);
+                    log.info("emulating the revocation of "+pepSession);
                     revokeAccess(pepSession);
                 } else {
-                    System.out.println("PEP.heartbeat(): recovering "+pepSession);
+                    log.info("recovering "+pepSession);
                     recoverAccess(pepSession);
                 }
             } 
             if(sessionList.getLength() == 0) 
-                    System.out.println("PEP.heartbeat(): OK -- no changes (sessions: "+sessions.size()+")");
-        } catch (XmlRpcException ex) {
-            Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(PEP.class.getName()).log(Level.SEVERE, null, ex);
+                    log.info("OK -- no changes (sessions: "+sessions.size()+")");
+        } catch (XmlRpcException | ParserConfigurationException ex) {
+            log.error(ex.toString());
         }
     }
 

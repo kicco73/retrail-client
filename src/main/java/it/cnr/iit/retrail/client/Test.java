@@ -6,9 +6,11 @@ import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepRequestAttribute;
 import it.cnr.iit.retrail.commons.PepSession;
 import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Test {
-
+    protected static final Logger log = LoggerFactory.getLogger(Test.class);
     public static void main(String[] args) throws Exception {
         URL pdpUrl = new URL("http://localhost:8080");
         URL myUrl = new URL("http://localhost:8081");
@@ -33,7 +35,7 @@ public class Test {
         //System.out.println("tryAccess = " + result);
 
         PepSession session1 = client.startAccess(accessRequest);
-        System.out.println("startAccess = " + session1 + ", sessionId = "+session1.getId());
+        log.info("startAccess = " + session1);
         //PepSession session2 = client.startAccess(accessRequest);
         //System.out.println("startAccess = " + session2 + ", sessionId = "+session2.getId());
         //System.out.println("endAccess = " +session1.getId());

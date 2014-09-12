@@ -6,6 +6,8 @@
 
 package it.cnr.iit.retrail.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 /**
@@ -13,6 +15,8 @@ import org.w3c.dom.Node;
  * @author oneadmin
  */
 public class APIImpl implements API {
+    
+    protected static final Logger log = LoggerFactory.getLogger(APIImpl.class);
     @Override
     public void revokeAccess(Node pepSession) {
         PEPMediator.getInstance().revokeAccess(pepSession);
