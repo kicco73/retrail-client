@@ -6,6 +6,7 @@
 package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.PepSession;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.slf4j.Logger;
@@ -40,7 +41,8 @@ public class PEPMediator implements API {
     }
 
     @Override
-    public synchronized void revokeAccess(Node session) {
+    public synchronized Node revokeAccess(Node session, String pdpUrl) {
+        // TODO: pdpUrl ignored for now, assuming only one pdp.
         PepSession pepSession = new PepSession((Document) session);
         boolean found = false;
 
@@ -53,6 +55,7 @@ public class PEPMediator implements API {
         if (!found) {
             log.error("UNEXISTENT SESSION: " + pepSession);
         }
+        return null;
     }
 
 }

@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package it.cnr.iit.retrail.client;
 
 import org.slf4j.Logger;
@@ -15,11 +14,13 @@ import org.w3c.dom.Node;
  * @author oneadmin
  */
 public class APIImpl implements API {
-    
+
     protected static final Logger log = LoggerFactory.getLogger(APIImpl.class);
+    protected static final PEPMediator mediator = PEPMediator.getInstance();
+
     @Override
-    public void revokeAccess(Node pepSession) {
-        PEPMediator.getInstance().revokeAccess(pepSession);
+    public Node revokeAccess(Node pepSession, String pdpUrl) {
+        return mediator.revokeAccess(pepSession, pdpUrl);
     }
 
 }

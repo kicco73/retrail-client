@@ -2,6 +2,7 @@
  */
 package it.cnr.iit.retrail.client;
 
+import it.cnr.iit.retrail.commons.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepAccessResponse;
@@ -16,18 +17,16 @@ import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class PEP extends Server {
-    private final XmlRpcClient client;
-    private final Set<PepSession> sessions; 
-    
+
+    private final Client client;
+    private final Set<PepSession> sessions;
+
     /**
      *
      * @param pdpUrl
@@ -35,22 +34,10 @@ public class PEP extends Server {
      * @throws java.net.UnknownHostException
      * @throws org.apache.xmlrpc.XmlRpcException
      */
-    public PEP(URL pdpUrl, URL myUrl) throws UnknownHostException, XmlRpcException, IOException {
+    public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException {
         super(myUrl, APIImpl.class);
-        this.sessions = new HashSet<>();
-        // create configuration
-        XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-        config.setServerURL(pdpUrl);
-        config.setEnabledForExtensions(true);
-        config.setConnectionTimeout(60 * 1000);
-        config.setReplyTimeout(60 * 1000);
-
-        client = new XmlRpcClient();
-        // use Commons HttpClient as transport
-        client.setTransportFactory(
-                new XmlRpcCommonsTransportFactory(client));
-        // set configuration
-        client.setConfig(config);
+        client = new Client(pdpUrl);
+        sessions = new HashSet<>();
     }
 
     @Override
@@ -63,7 +50,7 @@ public class PEP extends Server {
     public synchronized boolean hasSession(PepSession session) {
         return sessions.contains(session);
     }
-    
+
     public synchronized boolean tryAccess(PepAccessRequest req) throws Exception {
         Object[] params = new Object[]{req.toElement()};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
@@ -76,18 +63,19 @@ public class PEP extends Server {
         Object[] params = new Object[]{req.toElement(), myUrl.toString()};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        if(response.getId() != null)
+        if (response.getId() != null) {
             sessions.add(response);
+        }
         return response;
     }
-    
+
     public synchronized void recoverAccess(PepSession session) {
-        log.info(""+session);
+        log.info("" + session);
         sessions.add(session);
     }
-    
+
     public synchronized void revokeAccess(PepSession session) {
-        log.info(""+session);
+        log.info("" + session);
         sessions.remove(session);
     }
 
@@ -103,30 +91,32 @@ public class PEP extends Server {
     }
 
     @Override
-    protected synchronized void heartbeat() {
+    protected synchronized void watchdog() {
         List<String> sessionsList = new ArrayList<>();
-        for(PepSession s: sessions)
+        for (PepSession s : sessions) {
             sessionsList.add(s.getId());
+        }
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
         Document doc;
         try {
             doc = (Document) client.execute("UCon.heartbeat", params);
             NodeList sessionList = doc.getElementsByTagName("Response");
-            for(int n = 0; n < sessionList.getLength(); n++) {
+            for (int n = 0; n < sessionList.getLength(); n++) {
                 Document d = DomUtils.newDocument();
                 Element e = (Element) d.importNode(sessionList.item(n), true);
                 d.appendChild(e);
                 PepSession pepSession = new PepSession(d);
-                if(pepSession.decision != PepAccessResponse.DecisionEnum.Permit) {
-                    log.info("emulating the revocation of "+pepSession);
+                if (pepSession.decision != PepAccessResponse.DecisionEnum.Permit) {
+                    log.info("emulating the revocation of " + pepSession);
                     revokeAccess(pepSession);
                 } else {
-                    log.info("recovering "+pepSession);
+                    log.info("recovering " + pepSession);
                     recoverAccess(pepSession);
                 }
-            } 
-            if(sessionList.getLength() == 0) 
-                    log.info("OK -- no changes (sessions: "+sessions.size()+")");
+            }
+            if (sessionList.getLength() == 0) {
+                log.debug("OK -- no changes (sessions: " + sessions.size() + ")");
+            }
         } catch (XmlRpcException | ParserConfigurationException ex) {
             log.error(ex.toString());
         }

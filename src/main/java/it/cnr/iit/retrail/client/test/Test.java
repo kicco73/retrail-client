@@ -1,7 +1,8 @@
 /*
  */
-package it.cnr.iit.retrail.client;
+package it.cnr.iit.retrail.client.test;
 
+import it.cnr.iit.retrail.client.PEP;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepRequestAttribute;
 import it.cnr.iit.retrail.commons.PepSession;
