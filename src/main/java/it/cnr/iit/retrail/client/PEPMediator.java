@@ -6,7 +6,6 @@
 package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.PepSession;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.slf4j.Logger;

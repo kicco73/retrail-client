@@ -51,21 +51,20 @@ public class PEP extends Server {
         return sessions.contains(session);
     }
 
-    public synchronized boolean tryAccess(PepAccessRequest req) throws Exception {
-        Object[] params = new Object[]{req.toElement()};
-        Document doc = (Document) client.execute("UCon.tryAccess", params);
-        PepAccessResponse response = new PepAccessResponse(doc);
-        boolean result = response.decision == PepAccessResponse.DecisionEnum.Permit;
-        return result;
-    }
-
-    public synchronized PepSession startAccess(PepAccessRequest req) throws Exception {
+    public synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
         Object[] params = new Object[]{req.toElement(), myUrl.toString()};
-        Document doc = (Document) client.execute("UCon.startAccess", params);
+        Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
         if (response.getId() != null) {
             sessions.add(response);
         }
+        return response;
+    }
+
+    public synchronized PepSession startAccess(PepSession session) throws Exception {
+        Object[] params = new Object[]{session.getId()};
+        Document doc = (Document) client.execute("UCon.startAccess", params);
+        PepSession response = new PepSession(doc);
         return response;
     }
 

@@ -4,6 +4,7 @@ package it.cnr.iit.retrail.client.test;
 
 import it.cnr.iit.retrail.client.PEP;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
+import it.cnr.iit.retrail.commons.PepAccessResponse;
 import it.cnr.iit.retrail.commons.PepRequestAttribute;
 import it.cnr.iit.retrail.commons.PepSession;
 import java.net.URL;
@@ -32,11 +33,12 @@ public class Test {
         
         boolean result;
         
-        //result = client.tryAccess(accessRequest);
-        //System.out.println("tryAccess = " + result);
-
-        PepSession session1 = client.startAccess(accessRequest);
-        log.info("startAccess = " + session1);
+        PepSession session1 = client.tryAccess(accessRequest);
+        log.info("tryAccess: {}", session1);
+        if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {
+            client.startAccess(session1);
+            log.info("startAccess: {}", session1);
+        } 
         //PepSession session2 = client.startAccess(accessRequest);
         //System.out.println("startAccess = " + session2 + ", sessionId = "+session2.getId());
         //System.out.println("endAccess = " +session1.getId());
