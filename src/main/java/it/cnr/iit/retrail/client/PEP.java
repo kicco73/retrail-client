@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.w3c.dom.Document;
@@ -73,9 +75,9 @@ public class PEP extends Server {
         sessions.add(session);
     }
 
-    public synchronized void revokeAccess(PepSession session) {
-        log.info("" + session);
-        sessions.remove(session);
+    public synchronized void revokeAccess(PepSession session) throws Exception {
+        log.warn("calling endAccess for {}", session);
+        endAccess(session);
     }
 
     public synchronized void endAccess(PepSession session) throws Exception {
@@ -117,6 +119,8 @@ public class PEP extends Server {
                 log.debug("OK -- no changes (sessions: " + sessions.size() + ")");
             }
         } catch (XmlRpcException | ParserConfigurationException ex) {
+            log.error(ex.toString());
+        } catch (Exception ex) {
             log.error(ex.toString());
         }
     }
