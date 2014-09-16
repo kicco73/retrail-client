@@ -8,6 +8,7 @@ package it.cnr.iit.retrail.client;
 import it.cnr.iit.retrail.commons.PepSession;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -25,9 +26,11 @@ public class PEPMediator implements API {
     static private PEPMediator instance = null;
     final private Collection<PEP> listeners = new ArrayList<>();
     protected static final Logger log = LoggerFactory.getLogger(PEPMediator.class);
+
     static PEPMediator getInstance() {
-        if (instance == null) 
+        if (instance == null) {
             instance = new PEPMediator();
+        }
         return instance;
     }
 
@@ -45,12 +48,17 @@ public class PEPMediator implements API {
         PepSession pepSession = new PepSession((Document) session);
         boolean found = false;
 
-        for (PEP listener : listeners) 
+        for (PEP listener : listeners) {
             if (found = listener.hasSession(pepSession)) {
-                listener.revokeAccess(pepSession);
-                break;
+                try {
+                    listener.revokeAccess(pepSession);
+                    break;
+                } catch (Exception ex) {
+                    log.error(ex.toString());
+                }
             }
-        
+        }
+
         if (!found) {
             log.error("UNEXISTENT SESSION: " + pepSession);
         }

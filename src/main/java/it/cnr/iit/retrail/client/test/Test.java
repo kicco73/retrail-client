@@ -34,16 +34,16 @@ public class Test {
         boolean result;
         
         PepSession session1 = client.tryAccess(accessRequest);
-        log.info("tryAccess: {}", session1);
+        log.info("tryAccess 1: {}", session1);
         if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {
             client.startAccess(session1);
-            log.info("startAccess: {}", session1);
+            log.info("startAccess 1: {}", session1);
         } 
-        //PepSession session2 = client.startAccess(accessRequest);
-        //System.out.println("startAccess = " + session2 + ", sessionId = "+session2.getId());
-        //System.out.println("endAccess = " +session1.getId());
-        //client.endAccess(session1);
-        //System.out.println("endAccess = " +session2.getId());
-        //client.endAccess(session2);
+        PepSession session2 = client.tryAccess(accessRequest);
+        log.info("tryAccess: {}", session2);
+        if(session2.decision == PepAccessResponse.DecisionEnum.Permit) {
+            client.startAccess(session2);
+            log.info("startAccess 2: {}", session2);
+        } 
     }
 }
