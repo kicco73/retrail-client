@@ -56,7 +56,7 @@ public class PEP extends Server {
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), null};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
-        if (response.getSystemId() != null) {
+        if (response.getUuid() != null) {
             sessions.add(response);
         }
         log.info("end " + req);
@@ -65,7 +65,7 @@ public class PEP extends Server {
 
     public synchronized PepSession startAccess(PepSession session) throws Exception {
         log.info("begin " + session);
-        Object[] params = new Object[]{session.getSystemId(), session.getCustomId()};
+        Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
         log.info("end " + session);
@@ -84,7 +84,7 @@ public class PEP extends Server {
 
     public synchronized void endAccess(PepSession session) throws Exception {
         log.info("" + session);
-        Object[] params = new Object[]{session.getSystemId(), session.getCustomId()};
+        Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
         client.execute("UCon.endAccess", params);
         sessions.remove(session);
     }
@@ -99,7 +99,7 @@ public class PEP extends Server {
     protected synchronized void watchdog() {
         List<String> sessionsList = new ArrayList<>();
         for (PepSession s : sessions) {
-            sessionsList.add(s.getSystemId());
+            sessionsList.add(s.getUuid());
         }
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
         Document doc;
