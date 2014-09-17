@@ -33,6 +33,7 @@ public class Test {
         
         boolean result;
         
+        //Thread.sleep(1000);
         PepSession session1 = client.tryAccess(accessRequest);
         log.info("tryAccess 1: {}", session1);
         if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {

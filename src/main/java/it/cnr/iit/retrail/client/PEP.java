@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.w3c.dom.Document;
@@ -54,19 +52,23 @@ public class PEP extends Server {
     }
 
     public synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
-        Object[] params = new Object[]{req.toElement(), myUrl.toString()};
+        log.info("begin " + req);
+        Object[] params = new Object[]{req.toElement(), myUrl.toString(), null};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
-        if (response.getId() != null) {
+        if (response.getSystemId() != null) {
             sessions.add(response);
         }
+        log.info("end " + req);
         return response;
     }
 
     public synchronized PepSession startAccess(PepSession session) throws Exception {
-        Object[] params = new Object[]{session.getId()};
+        log.info("begin " + session);
+        Object[] params = new Object[]{session.getSystemId(), session.getCustomId()};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
+        log.info("end " + session);
         return response;
     }
 
@@ -81,12 +83,14 @@ public class PEP extends Server {
     }
 
     public synchronized void endAccess(PepSession session) throws Exception {
-        Object[] params = new Object[]{session.getId()};
+        log.info("" + session);
+        Object[] params = new Object[]{session.getSystemId(), session.getCustomId()};
         client.execute("UCon.endAccess", params);
         sessions.remove(session);
     }
 
     public synchronized Node echo(Node node) throws Exception {
+        log.info("");
         Object[] params = new Object[]{node};
         return (Node) client.execute("UCon.echo", params);
     }
@@ -95,7 +99,7 @@ public class PEP extends Server {
     protected synchronized void watchdog() {
         List<String> sessionsList = new ArrayList<>();
         for (PepSession s : sessions) {
-            sessionsList.add(s.getId());
+            sessionsList.add(s.getSystemId());
         }
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
         Document doc;

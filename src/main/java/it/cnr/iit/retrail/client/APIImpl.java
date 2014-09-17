@@ -5,6 +5,7 @@
  */
 package it.cnr.iit.retrail.client;
 
+import java.net.MalformedURLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -19,7 +20,8 @@ public class APIImpl implements API {
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override
-    public Node revokeAccess(Node pepSession, String pdpUrl) {
+    public Node revokeAccess(Node pepSession, String pdpUrl) throws MalformedURLException {
+        log.warn("{}, pdpUrl={}", pepSession, pdpUrl);
         return mediator.revokeAccess(pepSession, pdpUrl);
     }
 
