@@ -7,6 +7,7 @@ package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.PepSession;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -44,9 +45,10 @@ public class PEPMediator implements API {
     }
 
     @Override
-    public synchronized Node revokeAccess(Node session, String pdpUrl) throws MalformedURLException {
-        // TODO: pdpUrl ignored for now, assuming only one pdp.
+    public synchronized Node revokeAccess(Node session) throws MalformedURLException {
         PepSession pepSession = new PepSession((Document) session);
+        // TODO: uconUrl ignored for now, assuming only one pdp.
+        URL uconUrl = pepSession.getUconUrl();
         boolean found = false;
 
         for (PEP listener : listeners) {

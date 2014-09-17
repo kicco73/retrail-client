@@ -20,9 +20,9 @@ public class APIImpl implements API {
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override
-    public Node revokeAccess(Node pepSession, String pdpUrl) throws MalformedURLException {
-        log.warn("{}, pdpUrl={}", pepSession, pdpUrl);
-        return mediator.revokeAccess(pepSession, pdpUrl);
+    public Node revokeAccess(Node pepSession) throws MalformedURLException {
+        log.warn("{}", pepSession);
+        return mediator.revokeAccess(pepSession);
     }
 
 }
