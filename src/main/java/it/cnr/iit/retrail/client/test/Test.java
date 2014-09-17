@@ -33,18 +33,21 @@ public class Test {
         
         boolean result;
         
-        //Thread.sleep(1000);
         PepSession session1 = client.tryAccess(accessRequest);
         log.info("tryAccess 1: {}", session1);
+        Thread.sleep(3000);
+        
         if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {
             client.startAccess(session1);
             log.info("startAccess 1: {}", session1);
-        } 
+        }
+        /*
         PepSession session2 = client.tryAccess(accessRequest);
         log.info("tryAccess: {}", session2);
         if(session2.decision == PepAccessResponse.DecisionEnum.Permit) {
             client.startAccess(session2);
             log.info("startAccess 2: {}", session2);
         } 
+                */
     }
 }
