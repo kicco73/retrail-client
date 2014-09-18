@@ -22,11 +22,9 @@ public interface PEPInterface {
     
     PepSession startAccess(PepSession session) throws Exception;
 
-    void endAccess(PepSession session) throws Exception;
+    PepSession endAccess(PepSession session) throws Exception;
 
     void onRecoverAccess(PepSession session) throws Exception;
-
-    boolean shouldRecoverAccess(PepSession session);
 
     void onRevokeAccess(PepSession session) throws Exception;
     

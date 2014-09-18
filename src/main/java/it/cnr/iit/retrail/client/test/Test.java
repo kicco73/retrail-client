@@ -39,7 +39,8 @@ public class Test {
         Thread.sleep(3000);
         
         if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {
-            pep.startAccess(session1);
+            PepSession response = pep.startAccess(session1);
+            log.info("startAccess 1: {}", response);
             log.info("startAccess 1: {}", session1);
         }
         /*
