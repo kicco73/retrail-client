@@ -14,9 +14,9 @@ import org.w3c.dom.Node;
  *
  * @author oneadmin
  */
-public class APIImpl implements API {
+public class XmlRpc implements XmlRpcInterface {
 
-    protected static final Logger log = LoggerFactory.getLogger(APIImpl.class);
+    protected static final Logger log = LoggerFactory.getLogger(XmlRpc.class);
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override

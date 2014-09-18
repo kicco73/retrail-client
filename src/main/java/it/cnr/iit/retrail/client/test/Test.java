@@ -3,6 +3,7 @@
 package it.cnr.iit.retrail.client.test;
 
 import it.cnr.iit.retrail.client.PEP;
+import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepAccessResponse;
 import it.cnr.iit.retrail.commons.PepRequestAttribute;
@@ -16,8 +17,8 @@ public class Test {
     public static void main(String[] args) throws Exception {
         URL pdpUrl = new URL("http://localhost:8080");
         URL myUrl = new URL("http://localhost:8081");
-        PEP client = new PEP(pdpUrl, myUrl);
-        client.init();
+        PEPInterface pep = new PEP(pdpUrl, myUrl);
+        pep.init();
         PepAccessRequest accessRequest = PepAccessRequest.newInstance(
                 "fedoraRole", 
                 "urn:fedora:names:fedora:2.1:action:id-getDatastreamDissemination", 
@@ -33,19 +34,19 @@ public class Test {
         
         boolean result;
         
-        PepSession session1 = client.tryAccess(accessRequest);
+        PepSession session1 = pep.tryAccess(accessRequest);
         log.info("tryAccess 1: {}", session1);
         Thread.sleep(3000);
         
         if(session1.decision == PepAccessResponse.DecisionEnum.Permit) {
-            client.startAccess(session1);
+            pep.startAccess(session1);
             log.info("startAccess 1: {}", session1);
         }
         /*
-        PepSession session2 = client.tryAccess(accessRequest);
+        PepSession session2 = pep.tryAccess(accessRequest);
         log.info("tryAccess: {}", session2);
         if(session2.decision == PepAccessResponse.DecisionEnum.Permit) {
-            client.startAccess(session2);
+            pep.startAccess(session2);
             log.info("startAccess 2: {}", session2);
         } 
                 */

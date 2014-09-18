@@ -17,12 +17,12 @@ import org.w3c.dom.Node;
 
 /**
  * Handles events from the APIs exposed by the web server and dispatches them to
- * the proper PEP instance. PEP instances must register by addListener() on
- * creation in order for them to be dispatched async events.
+ the proper PEP instance. PEP instances must register by addListener() on
+ creation in order for them to be dispatched async events.
  *
  * @author oneadmin
  */
-public class PEPMediator implements API {
+public class PEPMediator implements XmlRpcInterface {
 
     static private PEPMediator instance = null;
     final private Collection<PEP> listeners = new ArrayList<>();
@@ -53,7 +53,7 @@ public class PEPMediator implements API {
         for (PEP listener : listeners) {
             if (found = listener.hasSession(pepSession)) {
                 try {
-                    listener.revokeAccess(pepSession);
+                    listener.onRevokeAccess(pepSession);
                     break;
                 } catch (Exception ex) {
                     log.error(ex.toString());

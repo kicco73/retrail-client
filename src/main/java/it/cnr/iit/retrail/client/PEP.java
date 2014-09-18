@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class PEP extends Server {
+public class PEP extends Server implements PEPInterface {
 
     private final Client client;
     private final Set<PepSession> sessions;
@@ -35,7 +35,7 @@ public class PEP extends Server {
      * @throws org.apache.xmlrpc.XmlRpcException
      */
     public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException {
-        super(myUrl, APIImpl.class);
+        super(myUrl, XmlRpc.class, "PEP");
         client = new Client(pdpUrl);
         sessions = new HashSet<>();
     }
@@ -47,42 +47,61 @@ public class PEP extends Server {
         super.init();
     }
 
-    public synchronized boolean hasSession(PepSession session) {
+    @Override
+    public final synchronized boolean hasSession(PepSession session) {
         return sessions.contains(session);
     }
 
-    public synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
-        log.info("begin " + req);
+    @Override
+    public final synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
+        log.info(""+req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), null};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
         if (response.getUuid() != null) {
             sessions.add(response);
         }
-        log.info("end " + req);
+        log.debug("end " + req);
         return response;
     }
 
-    public synchronized PepSession startAccess(PepSession session) throws Exception {
-        log.info("begin " + session);
+    @Override
+    public final synchronized PepSession startAccess(PepSession session) throws Exception {
+        log.info("" + session);
         Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        log.info("end " + session);
+        log.debug("end " + session);
         return response;
     }
 
-    public synchronized void recoverAccess(PepSession session) {
-        log.info("" + session);
-        sessions.add(session);
+    @Override
+    public final synchronized void onRecoverAccess(PepSession session) throws Exception {
+        log.warn("" + session);
+        if(session.getStatus() != PepSession.Status.REVOKED && shouldRecoverAccess(session)) {
+            log.warn("recovering " + session);
+            sessions.add(session);
+        } else {
+            log.warn("discarding " + session);
+            endAccess(session);
+        }
     }
-
-    public synchronized void revokeAccess(PepSession session) throws Exception {
+    
+    @Override
+    public boolean shouldRecoverAccess(PepSession session) {
+        boolean defaults = true;
+        log.warn("defaults to "+ defaults);
+        return defaults;
+    }
+    
+    @Override
+    public synchronized void onRevokeAccess(PepSession session) throws Exception {
         log.warn("calling endAccess for {}", session);
         endAccess(session);
     }
 
-    public synchronized void endAccess(PepSession session) throws Exception {
+    @Override
+    public final synchronized void endAccess(PepSession session) throws Exception {
         log.info("" + session);
         Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
         client.execute("UCon.endAccess", params);
@@ -113,10 +132,10 @@ public class PEP extends Server {
                 PepSession pepSession = new PepSession(d);
                 if (pepSession.decision != PepAccessResponse.DecisionEnum.Permit) {
                     log.info("emulating the revocation of " + pepSession);
-                    revokeAccess(pepSession);
+                    onRevokeAccess(pepSession);
                 } else {
                     log.info("recovering " + pepSession);
-                    recoverAccess(pepSession);
+                    onRecoverAccess(pepSession);
                 }
             }
             if (sessionList.getLength() == 0) {
