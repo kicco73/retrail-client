@@ -53,7 +53,7 @@ public class PEP extends Server implements PEPInterface {
     }
 
     public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
-        log.info(""+req);
+        log.info("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
@@ -63,12 +63,12 @@ public class PEP extends Server implements PEPInterface {
         log.debug("end " + req);
         return response;
     }
-    
+
     @Override
     public final synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
         return tryAccess(req, null);
     }
-    
+
     public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
         log.info("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
@@ -77,7 +77,20 @@ public class PEP extends Server implements PEPInterface {
         log.debug("got {}" + response);
         return response;
     }
-    
+
+    public final synchronized void assignCustomId(String uuid, String customId, String newCustomId) throws XmlRpcException {
+        log.warn("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
+        Object[] params = new Object[]{uuid, customId, newCustomId};
+        Document doc = (Document) client.execute("UCon.assignCustomId", params);
+        for (PepSession session : sessions) {
+            if ((uuid != null && session.getUuid().equals(uuid))
+                    || (customId != null && session.getCustomId().equals(customId))) {
+                session.setCustomId(newCustomId);
+                break;
+            }
+        }
+    }
+
     @Override
     public final synchronized PepSession startAccess(PepSession session) throws Exception {
         return startAccess(session.getUuid(), session.getCustomId());
@@ -86,7 +99,7 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized void onRecoverAccess(PepSession session) throws Exception {
         log.warn("" + session);
-        if(session.getStatus() != PepSession.Status.REVOKED && shouldRecoverAccess(session)) {
+        if (session.getStatus() != PepSession.Status.REVOKED && shouldRecoverAccess(session)) {
             log.warn("recovering " + session);
             sessions.add(session);
         } else {
@@ -94,14 +107,14 @@ public class PEP extends Server implements PEPInterface {
             endAccess(session);
         }
     }
-    
+
     @Override
     public boolean shouldRecoverAccess(PepSession session) {
         boolean defaults = true;
-        log.warn("defaults to "+ defaults);
+        log.warn("defaults to " + defaults);
         return defaults;
     }
-    
+
     @Override
     public synchronized void onRevokeAccess(PepSession session) throws Exception {
         log.warn("calling endAccess for {}", session);
@@ -116,6 +129,7 @@ public class PEP extends Server implements PEPInterface {
         log.debug("got {}" + response);
         sessions.remove(response);
     }
+
     @Override
     public final synchronized void endAccess(PepSession session) throws Exception {
         endAccess(session.getUuid(), session.getCustomId());
@@ -160,5 +174,4 @@ public class PEP extends Server implements PEPInterface {
             log.error(ex.toString());
         }
     }
-
 }
