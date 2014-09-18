@@ -30,4 +30,5 @@ public interface PEPInterface {
     
     boolean hasSession(PepSession session);
 
+    void term() throws InterruptedException;
 }

@@ -46,13 +46,22 @@ public class PEPPositiveTest {
             URL pdpUrl = new URL("http://localhost:8080");
             URL myUrl = new URL("http://localhost:8081");
             pep = new PEP(pdpUrl, myUrl);
+            // clean up previous sessions, if any, by clearing the recoverable
+            // access flag. This ensures the next heartbeat we'll have a clean
+            // ucon status (the first heartbeat is waited by init()).
+            pep.setAccessRecoverableByDefault(false);
+            pep.init();        // We should have no sessions now
         } catch (XmlRpcException | IOException e) {
             fail("unexpected exception: " + e.getMessage());
         }
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        for (PepSession s : pep.sessions.values()) {
+            pep.endAccess(s);
+        }
+        pep.term();
     }
 
     @Before
@@ -77,27 +86,21 @@ public class PEPPositiveTest {
 
     @After
     public void tearDown() throws Exception {
-        for(PepSession s: pep.sessions.values())
-            pep.endAccess(s);
     }
-    
+
     /**
      * Test of hasSession method, of class PEP.
      */
     @Test
     public void test1_init() throws IOException {
         log.info("Check if the server made us recover some local sessions");
-        // clean up previous sessions, if any, by clearing the recoverable
-        // access flag. This ensures the next heartbeat we'll have a clean
-        // ucon status (the first heartbeat is waited by init()).
-        pep.setAccessRecoverableByDefault(false);
-        pep.init();        // We should have no sessions now
         assertEquals(0, pep.sessions.size());
         log.info("Ok, no recovered sessions");
     }
-    
+
     /**
      * Test of echo method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -112,6 +115,7 @@ public class PEPPositiveTest {
 
     /**
      * Test of tryAccess method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -124,9 +128,10 @@ public class PEPPositiveTest {
         assertFalse(pep.hasSession(pepSession));
         log.info("short cycle ok");
     }
-    
+
     /**
      * Test of tryAccess method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -134,14 +139,15 @@ public class PEPPositiveTest {
         log.info("TryAccessWithCustomId");
         PepSession pepSession = pep.tryAccess(pepRequest, "ziopino");
         assertEquals(PepAccessResponse.DecisionEnum.Permit, pepSession.decision);
-        assertEquals("ziopino", pepSession.getCustomId()); 
+        assertEquals("ziopino", pepSession.getCustomId());
         assertTrue(pep.hasSession(pepSession));
         pep.endAccess(null, pepSession.getCustomId());
         assertFalse(pep.hasSession(pepSession));
     }
-    
-        /**
+
+    /**
      * Test of assignCustomId method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -157,6 +163,7 @@ public class PEPPositiveTest {
 
     /**
      * Test of assignCustomId method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -172,6 +179,7 @@ public class PEPPositiveTest {
 
     /**
      * Test of startAccess method, of class PEP.
+     *
      * @throws java.lang.Exception
      */
     @Test

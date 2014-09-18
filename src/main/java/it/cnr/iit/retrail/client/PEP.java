@@ -10,15 +10,12 @@ import it.cnr.iit.retrail.commons.PepSession;
 import it.cnr.iit.retrail.commons.Server;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.xmlrpc.XmlRpcException;
@@ -185,7 +182,7 @@ public class PEP extends Server implements PEPInterface {
     }
     
     @Override
-    protected synchronized void watchdog() {
+    protected synchronized void watchdog() throws InterruptedException {
         List<String> sessionsList = new ArrayList<>(sessions.keySet());
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
         Document doc;
@@ -212,6 +209,8 @@ public class PEP extends Server implements PEPInterface {
             notifyAll();
         } catch (XmlRpcException | ParserConfigurationException ex) {
             log.error(ex.toString());
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.toString());
         }
