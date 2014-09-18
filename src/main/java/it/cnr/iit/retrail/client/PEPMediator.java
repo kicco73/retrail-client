@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 public class PEPMediator implements XmlRpcInterface {
 
     static private PEPMediator instance = null;
-    final private Collection<PEP> listeners = new ArrayList<>();
+    final private Collection<PEPInterface> listeners = new ArrayList<>();
     protected static final Logger log = LoggerFactory.getLogger(PEPMediator.class);
 
     static PEPMediator getInstance() {
@@ -35,11 +35,11 @@ public class PEPMediator implements XmlRpcInterface {
         return instance;
     }
 
-    public synchronized void addListener(PEP listener) {
+    public synchronized void addListener(PEPInterface listener) {
         listeners.add(listener);
     }
 
-    public synchronized void removeListener(PEP listener) {
+    public synchronized void removeListener(PEPInterface listener) {
         listeners.remove(listener);
     }
 
@@ -50,7 +50,7 @@ public class PEPMediator implements XmlRpcInterface {
         URL uconUrl = pepSession.getUconUrl();
         boolean found = false;
 
-        for (PEP listener : listeners) {
+        for (PEPInterface listener : listeners) {
             if (found = listener.hasSession(pepSession)) {
                 try {
                     listener.onRevokeAccess(pepSession);

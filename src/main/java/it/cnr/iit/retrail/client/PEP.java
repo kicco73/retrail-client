@@ -24,8 +24,8 @@ import org.w3c.dom.NodeList;
 
 public class PEP extends Server implements PEPInterface {
 
-    private final Client client;
-    private final Set<PepSession> sessions;
+    protected final Client client;
+    protected final Set<PepSession> sessions;
 
     /**
      *
@@ -52,10 +52,9 @@ public class PEP extends Server implements PEPInterface {
         return sessions.contains(session);
     }
 
-    @Override
-    public final synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
+    public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
         log.info(""+req);
-        Object[] params = new Object[]{req.toElement(), myUrl.toString(), null};
+        Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
         if (response.getUuid() != null) {
@@ -64,15 +63,24 @@ public class PEP extends Server implements PEPInterface {
         log.debug("end " + req);
         return response;
     }
-
+    
     @Override
-    public final synchronized PepSession startAccess(PepSession session) throws Exception {
-        log.info("" + session);
-        Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
+    public final synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
+        return tryAccess(req, null);
+    }
+    
+    public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
+        log.info("uuid={}, customId={}", uuid, customId);
+        Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        log.debug("end " + session);
+        log.debug("got {}" + response);
         return response;
+    }
+    
+    @Override
+    public final synchronized PepSession startAccess(PepSession session) throws Exception {
+        return startAccess(session.getUuid(), session.getCustomId());
     }
 
     @Override
@@ -100,12 +108,17 @@ public class PEP extends Server implements PEPInterface {
         endAccess(session);
     }
 
+    public final synchronized void endAccess(String uuid, String customId) throws Exception {
+        log.info("uuid={}, customId={}", uuid, customId);
+        Object[] params = new Object[]{uuid, customId};
+        Document doc = (Document) client.execute("UCon.endAccess", params);
+        PepSession response = new PepSession(doc);
+        log.debug("got {}" + response);
+        sessions.remove(response);
+    }
     @Override
     public final synchronized void endAccess(PepSession session) throws Exception {
-        log.info("" + session);
-        Object[] params = new Object[]{session.getUuid(), session.getCustomId()};
-        client.execute("UCon.endAccess", params);
-        sessions.remove(session);
+        endAccess(session.getUuid(), session.getCustomId());
     }
 
     public synchronized Node echo(Node node) throws Exception {
