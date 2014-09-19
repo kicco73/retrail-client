@@ -81,7 +81,7 @@ public class PEP extends Server implements PEPInterface {
         if (response.getUuid() != null) {
             updateSession(response);
         }
-        log.debug("end " + req);
+        log.info("TRYACCESS got {}", response);
         return response;
     }
 
@@ -90,13 +90,14 @@ public class PEP extends Server implements PEPInterface {
         return tryAccess(req, null);
     }
 
-    private void updateSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
+    private PepSession updateSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
         PepSession old = sessions.get(s.getUuid());
         if(old == null)
             sessions.put(s.getUuid(), s);
         else {
             BeanUtils.copyProperties(old, s);
         }
+        return old;
     }
     
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
@@ -110,23 +111,24 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        updateSession(response);
-        log.info("got: {}", response);
-        return response;
+        log.info("STARTACCESS GOT: {}", response);
+        return updateSession(response);
     }
 
-    public final synchronized void assignCustomId(String uuid, String customId, String newCustomId) throws Exception {
+    public final synchronized PepSession assignCustomId(String uuid, String customId, String newCustomId) throws Exception {
         log.warn("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
         PepSession response = new PepSession(doc);
         if(hasSession(response))
-            updateSession(response);
+            response = updateSession(response);
+        return response;
     }
 
     @Override
     public final synchronized PepSession startAccess(PepSession session) throws Exception {
-        return startAccess(session.getUuid(), session.getCustomId());
+        session = startAccess(session.getUuid(), session.getCustomId());
+        return updateSession(session);
     }
 
     @Override
@@ -157,7 +159,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.endAccess", params);
         PepSession response = new PepSession(doc);
-        log.info("got {}" + response);
+        log.info("ENDACCESS got {}" + response);
         removeSession(response);
         return response;
     }
