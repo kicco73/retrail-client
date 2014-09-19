@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,14 @@ public class PEP extends Server implements PEPInterface {
         // update necessary because someone could be holding this object and the status is changed!
         updateSession(s);
         sessions.remove(s.getUuid());
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public Collection<PepSession> getSessions() {
+        return sessions.values();
     }
     
     public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
