@@ -29,6 +29,8 @@ public interface PEPInterface {
     void onRevokeAccess(PepSession session) throws Exception;
     
     boolean hasSession(PepSession session);
+    
+    PepSession getSession(String uuid);
 
     void term() throws InterruptedException;
 }

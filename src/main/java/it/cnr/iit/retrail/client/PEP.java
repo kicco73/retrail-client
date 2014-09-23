@@ -73,6 +73,11 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized boolean hasSession(PepSession session) {
         return sessions.containsKey(session.getUuid());
     }
+    
+    @Override
+    public final synchronized PepSession getSession(String uuid) {
+        return sessions.get(uuid);
+    }
 
     public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
         log.debug("" + req);
@@ -120,7 +125,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        log.debug("STARTACCESS GOT: {}", response);
+        log.warn("STARTACCESS GOT: {}", response);
         return updateSession(response);
     }
 
@@ -205,7 +210,7 @@ public class PEP extends Server implements PEPInterface {
                 Element e = (Element) d.importNode(sessionList.item(n), true);
                 d.appendChild(e);
                 PepSession pepSession = new PepSession(d);
-                if (pepSession.decision != PepAccessResponse.DecisionEnum.Permit) {
+                if (pepSession.getDecision() != PepAccessResponse.DecisionEnum.Permit) {
                     log.info("emulating the revocation of " + pepSession);
                     onRevokeAccess(pepSession);
                 } else {

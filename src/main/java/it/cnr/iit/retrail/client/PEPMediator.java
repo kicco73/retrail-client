@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -48,12 +49,14 @@ public class PEPMediator implements XmlRpcInterface {
         PepSession pepSession = new PepSession((Document) session);
         // TODO: uconUrl ignored for now, assuming only one pdp.
         URL uconUrl = pepSession.getUconUrl();
-        boolean found = false;
+        PepSession found = null;
 
         for (PEPInterface listener : listeners) {
-            if (found = listener.hasSession(pepSession)) {
+            found = listener.getSession(pepSession.getUuid());
+            if (found != null) {
                 try {
-                    listener.onRevokeAccess(pepSession);
+                    BeanUtils.copyProperties(found, pepSession);
+                    listener.onRevokeAccess(found);
                     break;
                 } catch (Exception ex) {
                     log.error(ex.toString());
@@ -61,7 +64,7 @@ public class PEPMediator implements XmlRpcInterface {
             }
         }
 
-        if (!found) {
+        if (found == null) {
             log.error("UNEXISTENT SESSION: " + pepSession);
         }
         return null;
