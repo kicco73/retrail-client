@@ -75,14 +75,14 @@ public class PEP extends Server implements PEPInterface {
     }
 
     public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
-        log.info("" + req);
+        log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
-        if (response.getUuid() != null) {
+        if (response.getStatus() == PepSession.Status.TRY) {
             updateSession(response);
         }
-        log.info("TRYACCESS got {}", response);
+        log.debug("TRYACCESS got {}", response);
         return response;
     }
 
@@ -116,16 +116,16 @@ public class PEP extends Server implements PEPInterface {
     }
     
     public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
-        log.info("uuid={}, customId={}", uuid, customId);
+        log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        log.info("STARTACCESS GOT: {}", response);
+        log.debug("STARTACCESS GOT: {}", response);
         return updateSession(response);
     }
 
     public final synchronized PepSession assignCustomId(String uuid, String customId, String newCustomId) throws Exception {
-        log.warn("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
+        log.debug("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
         PepSession response = new PepSession(doc);
@@ -164,11 +164,11 @@ public class PEP extends Server implements PEPInterface {
     }
 
     public final synchronized PepSession endAccess(String uuid, String customId) throws Exception {
-        log.info("uuid={}, customId={}", uuid, customId);
+        log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.endAccess", params);
         PepSession response = new PepSession(doc);
-        log.info("ENDACCESS got {}" + response);
+        log.debug("ENDACCESS got {}" + response);
         removeSession(response);
         return response;
     }
