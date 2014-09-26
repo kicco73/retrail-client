@@ -5,7 +5,7 @@
 
 package it.cnr.iit.retrail.client.impl;
 
-import it.cnr.iit.retrail.client.XmlRpcInterface;
+import it.cnr.iit.retrail.client.XmlRpcProtocol;
 import java.net.MalformedURLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import org.w3c.dom.Node;
  *
  * @author oneadmin
  */
-public class XmlRpc implements XmlRpcInterface {
+public class XmlRpc implements XmlRpcProtocol {
 
     protected static final Logger log = LoggerFactory.getLogger(XmlRpc.class);
     protected static final PEPMediator mediator = PEPMediator.getInstance();

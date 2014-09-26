@@ -6,7 +6,7 @@
 package it.cnr.iit.retrail.client.impl;
 
 import it.cnr.iit.retrail.client.PEPInterface;
-import it.cnr.iit.retrail.client.XmlRpcInterface;
+import it.cnr.iit.retrail.client.XmlRpcProtocol;
 import it.cnr.iit.retrail.commons.PepSession;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
  *
  * @author oneadmin
  */
-public class PEPMediator implements XmlRpcInterface {
+public class PEPMediator implements XmlRpcProtocol {
 
     static private PEPMediator instance = null;
     final private Collection<PEPInterface> listeners = new ArrayList<>();
