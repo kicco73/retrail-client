@@ -44,8 +44,7 @@ public interface PEPInterface {
     /**
      * tryAccess
      * 
-     * Attempt to access a resource and gets back the UCon decision.
-     * Also set 
+     * Attempts to access a resource and gets back the UCon decision.
      * Calling this is mandatory before starting the actual access.
      * @param req the access request with subject, action, resource attributes.
      * @param customId (optional) a custom unique identifier for the request
@@ -58,32 +57,54 @@ public interface PEPInterface {
     PepSession tryAccess(PepAccessRequest req, String customId) throws Exception;
     
     /**
-     *
-     * @param session
-     * @return
-     * @throws Exception
+     * startAccess
+     * 
+     * Declares that the resource is going to be really accessed from now on.
+     * The Usage Control System may still deny the access.
+     * Calling tryAccess is mandatory before starting the actual access.
+     * 
+     * @param session the access session returned by tryAccess.
+     * @return the updated PEP session, with its own UCon decision.
+     * @throws Exception if something went wrong. This has nothing to do with
+     * the decisions of the UCon about the request, but it's an actual error
+     * of the framework.
      */
     PepSession startAccess(PepSession session) throws Exception;
 
     /**
-     *
+     * endAccess
+     * 
+     * Terminates the session opened by tryAccess.
+     * This method must be always invoked by the client to declare the end of
+     * resource access for any session, even when the access has been revoked 
+     * by the UCon itself.
+     * 
      * @param session
-     * @return
-     * @throws Exception
+     * @return the updated PEP session.
+     * @throws Exception if something went wrong. 
      */
     PepSession endAccess(PepSession session) throws Exception;
 
     /**
-     *
-     * @param session
-     * @throws Exception
+     * onRecoverAccess
+     * 
+     * Event handler invoked when the PEP discovers a server side session 
+     * opened by this endpoint in a previous run. Default action is to
+     * add the session to the handled sessions. Possible method overruns 
+     * 
+     * Usage Control System. Default implementation is calling endAccess.
+     * @param session the updated PEP session.
+     * @throws Exception if something went wrong. 
      */
     void onRecoverAccess(PepSession session) throws Exception;
 
     /**
-     *
-     * @param session
-     * @throws Exception
+     * onRecoverAccess
+     * 
+     * Event handler invoked when a revoke access has been issued by the
+     * Usage Control System. Default implementation is calling endAccess.
+     * @param session the updated PEP session.
+     * @throws Exception if something went wrong. 
      */
     void onRevokeAccess(PepSession session) throws Exception;
     
