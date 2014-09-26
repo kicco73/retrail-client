@@ -1,9 +1,11 @@
-/* CNR - IIT
+/* 
+ * CNR - IIT
  * Coded by: 2014 Enrico "KMcC;) Carniani
  */
 
-package it.cnr.iit.retrail.client;
+package it.cnr.iit.retrail.client.impl;
 
+import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.commons.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
@@ -81,6 +83,7 @@ public class PEP extends Server implements PEPInterface {
         return sessions.get(uuid);
     }
 
+    @Override
     public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
         log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
@@ -118,6 +121,7 @@ public class PEP extends Server implements PEPInterface {
      *
      * @return
      */
+    @Override
     public Collection<PepSession> getSessions() {
         return sessions.values();
     }
@@ -191,10 +195,12 @@ public class PEP extends Server implements PEPInterface {
         return (Node) client.execute("UCon.echo", params);
     }
 
+    @Override
     public boolean isAccessRecoverableByDefault() {
         return accessRecoverableByDefault;
     }
 
+    @Override
     public void setAccessRecoverableByDefault(boolean accessRecoverableByDefault) {
         this.accessRecoverableByDefault = accessRecoverableByDefault;
     }

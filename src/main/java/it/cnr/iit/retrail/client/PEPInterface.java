@@ -8,6 +8,7 @@ package it.cnr.iit.retrail.client;
 import it.cnr.iit.retrail.commons.PepAccessRequest;
 import it.cnr.iit.retrail.commons.PepSession;
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  *
@@ -18,6 +19,8 @@ public interface PEPInterface {
     void init() throws IOException;
 
     PepSession tryAccess(PepAccessRequest req) throws Exception;
+    
+    PepSession tryAccess(PepAccessRequest req, String customId) throws Exception;
     
     PepSession startAccess(PepSession session) throws Exception;
 
@@ -30,6 +33,12 @@ public interface PEPInterface {
     boolean hasSession(PepSession session);
     
     PepSession getSession(String uuid);
-
+    
+    Collection<PepSession> getSessions();
+     
+    void setAccessRecoverableByDefault(boolean accessRecoverableByDefault);
+    
+    boolean isAccessRecoverableByDefault();
+    
     void term() throws InterruptedException;
 }

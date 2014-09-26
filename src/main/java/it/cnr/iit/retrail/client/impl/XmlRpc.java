@@ -3,8 +3,9 @@
  * Coded by: 2014 Enrico "KMcC;) Carniani
  */
 
-package it.cnr.iit.retrail.client;
+package it.cnr.iit.retrail.client.impl;
 
+import it.cnr.iit.retrail.client.XmlRpcInterface;
 import java.net.MalformedURLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
