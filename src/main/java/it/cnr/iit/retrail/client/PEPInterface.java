@@ -103,28 +103,34 @@ public interface PEPInterface {
      * 
      * Event handler invoked when a revoke access has been issued by the
      * Usage Control System. Default implementation is calling endAccess.
+     * 
      * @param session the updated PEP session.
      * @throws Exception if something went wrong. 
      */
     void onRevokeAccess(PepSession session) throws Exception;
     
     /**
-     *
-     * @param session
-     * @return
+     * hasSession
+     * 
+     * Tells is the given session is currently registered (i.e., ONGOING).
+     * 
+     * 
+     * @param session the PEP session we want to know about.
+     * @return true if the session is currently handled by this PEP.
      */
     boolean hasSession(PepSession session);
     
     /**
      *
      * @param uuid
-     * @return
+     * @return the PepSession for the given session id. May be null if
+     * the PEP does not handle this session.
      */
     PepSession getSession(String uuid);
     
     /**
      *
-     * @return
+     * @return the collection of sessions handled by this PEP.
      */
     Collection<PepSession> getSessions();
      
