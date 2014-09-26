@@ -1,5 +1,7 @@
-/*
+/* CNR - IIT
+ * Coded by: 2014 Enrico "KMcC;) Carniani
  */
+
 package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.Client;
