@@ -17,9 +17,9 @@ import java.util.Collection;
 public interface PEPInterface {
 
     /**
-     * init
+     * init()
      * 
-     * Performs PEP initializations and start up. It's mandatory to call this 
+     * performs PEP initializations and start up. It's mandatory to call this 
      * before invoking any other API of the component.
      * 
      * @throws IOException
@@ -27,9 +27,9 @@ public interface PEPInterface {
     void init() throws IOException;
 
     /**
-     * tryAccess
+     * tryAccess()
      * 
-     * Attempt to access a resource and gets back the UCon decision.
+     * attempts to access a resource and gets back the UCon decision.
      * Calling this is mandatory before starting the actual access.
      * 
      * @param req the access request with subject, action, resource attributes.
@@ -42,10 +42,11 @@ public interface PEPInterface {
     PepSession tryAccess(PepAccessRequest req) throws Exception;
     
     /**
-     * tryAccess
+     * tryAccess()
      * 
-     * Attempts to access a resource and gets back the UCon decision.
+     * attempts to access a resource and gets back the UCon decision.
      * Calling this is mandatory before starting the actual access.
+     * 
      * @param req the access request with subject, action, resource attributes.
      * @param customId (optional) a custom unique identifier for the request
      * @return the freshly opened PEP session. In case of denial, no session
@@ -57,9 +58,9 @@ public interface PEPInterface {
     PepSession tryAccess(PepAccessRequest req, String customId) throws Exception;
     
     /**
-     * startAccess
+     * startAccess()
      * 
-     * Declares that the resource is going to be really accessed from now on.
+     * declares that the resource is going to be really accessed from now on.
      * The Usage Control System may still deny the access.
      * Calling tryAccess is mandatory before starting the actual access.
      * 
@@ -72,37 +73,42 @@ public interface PEPInterface {
     PepSession startAccess(PepSession session) throws Exception;
 
     /**
-     * endAccess
+     * endAccess()
      * 
-     * Terminates the session opened by tryAccess.
+     * terminates the session opened by tryAccess.
      * This method must be always invoked by the client to declare the end of
      * resource access for any session, even when the access has been revoked 
      * by the UCon itself.
      * 
-     * @param session
+     * @param session the session to be ended.
      * @return the updated PEP session.
      * @throws Exception if something went wrong. 
      */
     PepSession endAccess(PepSession session) throws Exception;
 
     /**
-     * onRecoverAccess
+     * onRecoverAccess()
      * 
-     * Event handler invoked when the PEP discovers a server side session 
-     * opened by this endpoint in a previous run. Default action is to
-     * add the session to the handled sessions. Possible method overruns 
+     * is the default event handler invoked when the PEP discovers a server side
+     * session opened by this endpoint in a previous run. The Default action is
+     * to add the orphaned session to the handled sessions if the 
+     * accessRecoverableByDefault property is true, or to call endAccess 
+     * otherwise. It is recommended to overload this method to handle other
+     * specialized actions.
      * 
-     * Usage Control System. Default implementation is calling endAccess.
      * @param session the updated PEP session.
      * @throws Exception if something went wrong. 
      */
     void onRecoverAccess(PepSession session) throws Exception;
 
     /**
-     * onRecoverAccess
+     * onRevokeAccess()
      * 
-     * Event handler invoked when a revoke access has been issued by the
-     * Usage Control System. Default implementation is calling endAccess.
+     * is the event handler invoked when a revoke access has been issued by the
+     * Usage Control System. 
+     * Default implementation is calling endAccess to terminate all sessions.
+     * It is recommended to overload this method to take proper customized 
+     * actions.
      * 
      * @param session the updated PEP session.
      * @throws Exception if something went wrong. 
@@ -110,10 +116,9 @@ public interface PEPInterface {
     void onRevokeAccess(PepSession session) throws Exception;
     
     /**
-     * hasSession
+     * hasSession()
      * 
-     * Tells is the given session is currently registered (i.e., ONGOING).
-     * 
+     * tells if the given session is currently handled by this PEP.
      * 
      * @param session the PEP session we want to know about.
      * @return true if the session is currently handled by this PEP.
@@ -121,7 +126,10 @@ public interface PEPInterface {
     boolean hasSession(PepSession session);
     
     /**
-     *
+     * getSession()
+     * 
+     * returns the session with the given uuid, if any.
+     * 
      * @param uuid
      * @return the PepSession for the given session id. May be null if
      * the PEP does not handle this session.
@@ -129,26 +137,61 @@ public interface PEPInterface {
     PepSession getSession(String uuid);
     
     /**
-     *
-     * @return the collection of sessions handled by this PEP.
+     * getSessions()
+     * 
+     * returns the full collection of sessions handled by this PEP.
+     * 
+     * @return the collection of sessions handled by this PEP. May be empty
+     * but not null.
      */
     Collection<PepSession> getSessions();
      
     /**
-     *
-     * @param accessRecoverableByDefault
+     * setAccessRecoverableByDefault()
+     * 
+     * sets the property that allows to choose if orphaned sessions are to be 
+     * ended automatically, or handled manually. 
+     * If the PEP is for some reason restarted, all open sessions by the
+     * previous instance of the PEP in the UCon counterpart still remain open.
+     * These are notified by the UCon as soon as the heartbeat with the same
+     * endpoint is re-established. Once this has happened, the PEP is notified
+     * of the orphaned sessions and for each of them may decide to recover it
+     * or not.
+     * 
+     * @param accessRecoverableByDefault true if orphaned sessions are to be
+     * re-established by default, false otherwise. In the latter case, endAccess
+     * is called automatically. If true, it's also advisable to overload the
+     * onRecoverAccess() method to handle further actions.
      */
     void setAccessRecoverableByDefault(boolean accessRecoverableByDefault);
     
     /**
-     *
-     * @return
+     * isAccessRecoverableByDefault()
+     * 
+     * returns true if orphaned sessions are to be re-established by default,
+     * false to terminate them. In the latter case, endAccess
+     * is called automatically by the default onRecoverAccess() handler. 
+     * If the PEP is for some reason restarted, all open sessions by the
+     * previous instance of the PEP in the UCon counterpart still remain open.
+     * These are notified by the UCon as soon as the heartbeat with the same
+     * endpoint is re-established. Once this has happened, the PEP is notified
+     * of the orphaned sessions and for each of them may decide to recover it
+     * or not.
+     * It's recommended to overload the onRecoverAccess() method to perform 
+     * further customized actions. 
+     * 
+     * @return true if the orphaned sessions will be recovered, false otherwise.
      */
     boolean isAccessRecoverableByDefault();
     
     /**
-     *
-     * @throws InterruptedException
+     * term()
+     * 
+     * has to be called on PEP shutdown. Heartbeat will be terminated as well, 
+     * and the object will be eventually disposed.
+     * 
+     * @throws InterruptedException if the managing thread is, for example, 
+     * asked for interruption by the main program.
      */
     void term() throws InterruptedException;
 }
