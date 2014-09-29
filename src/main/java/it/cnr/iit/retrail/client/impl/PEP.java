@@ -44,7 +44,7 @@ public class PEP extends Server implements PEPInterface {
      * @throws org.apache.xmlrpc.XmlRpcException
      */
     public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException {
-        super(myUrl, XmlRpc.class, "PEP");
+        super(myUrl, PEPProtocolProxy.class, "PEP");
         accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
         sessions = new HashMap<>();

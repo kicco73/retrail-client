@@ -15,9 +15,9 @@ import org.w3c.dom.Node;
  *
  * @author oneadmin
  */
-public class XmlRpc implements PEPProtocol {
+public class PEPProtocolProxy implements PEPProtocol {
 
-    protected static final Logger log = LoggerFactory.getLogger(XmlRpc.class);
+    protected static final Logger log = LoggerFactory.getLogger(PEPProtocolProxy.class);
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override
