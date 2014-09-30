@@ -66,7 +66,7 @@ public class PEP extends Server implements PEPInterface {
     }
     
     @Override
-    public void init() throws IOException {
+    public void init() throws Exception {
         // register myself to event mediator since API instances will send events to listeners
         PEPMediator.getInstance().addListener(this);
         super.init();

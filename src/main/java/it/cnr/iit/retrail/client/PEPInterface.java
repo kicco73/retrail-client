@@ -22,9 +22,9 @@ public interface PEPInterface {
      * performs PEP initializations and start up. It's mandatory to call this 
      * before invoking any other API of the component.
      * 
-     * @throws IOException
+     * @throws Exception if anything goes wrong.
      */
-    void init() throws IOException;
+    void init() throws Exception;
 
     /**
      * tryAccess()
