@@ -112,8 +112,6 @@ public class PEP extends Server implements PEPInterface {
     }
     
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
-        // update necessary because someone could be holding this object and the status is changed!
-        updateSession(s);
         sessions.remove(s.getUuid());
     }
     
@@ -179,8 +177,11 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.endAccess", params);
         PepSession response = new PepSession(doc);
-        log.debug("ENDACCESS got {}" + response);
-        removeSession(response);
+        log.info("ENDACCESS got {}" + response);
+        // update necessary because someone could be holding this object and the status is changed!
+        response = updateSession(response);
+        if(response.getDecision() == PepAccessResponse.DecisionEnum.Permit)
+            removeSession(response);
         return response;
     }
 
