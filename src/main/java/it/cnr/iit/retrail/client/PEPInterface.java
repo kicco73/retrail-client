@@ -5,8 +5,8 @@
 
 package it.cnr.iit.retrail.client;
 
-import it.cnr.iit.retrail.commons.PepAccessRequest;
-import it.cnr.iit.retrail.commons.PepSession;
+import it.cnr.iit.retrail.commons.impl.PepRequest;
+import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -39,7 +39,7 @@ public interface PEPInterface {
      * the decisions of the UCon about the request, but it's an actual error
      * of the framework.
      */
-    PepSession tryAccess(PepAccessRequest req) throws Exception;
+    PepSession tryAccess(PepRequest req) throws Exception;
     
     /**
      * tryAccess()
@@ -55,7 +55,7 @@ public interface PEPInterface {
      * the decisions of the UCon about the request, but it's an actual error
      * of the framework.
      */
-    PepSession tryAccess(PepAccessRequest req, String customId) throws Exception;
+    PepSession tryAccess(PepRequest req, String customId) throws Exception;
     
     /**
      * startAccess()

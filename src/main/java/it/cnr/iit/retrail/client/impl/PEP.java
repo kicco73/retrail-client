@@ -8,10 +8,11 @@ package it.cnr.iit.retrail.client.impl;
 import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.commons.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
-import it.cnr.iit.retrail.commons.PepAccessRequest;
-import it.cnr.iit.retrail.commons.PepAccessResponse;
-import it.cnr.iit.retrail.commons.PepSession;
+import it.cnr.iit.retrail.commons.impl.PepRequest;
+import it.cnr.iit.retrail.commons.impl.PepResponse;
+import it.cnr.iit.retrail.commons.impl.PepSession;
 import it.cnr.iit.retrail.commons.Server;
+import it.cnr.iit.retrail.commons.Status;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -84,12 +85,12 @@ public class PEP extends Server implements PEPInterface {
     }
 
     @Override
-    public final synchronized PepSession tryAccess(PepAccessRequest req, String customId) throws Exception {
+    public final synchronized PepSession tryAccess(PepRequest req, String customId) throws Exception {
         log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         PepSession response = new PepSession(doc);
-        if (response.getStatus() == PepSession.Status.TRY) {
+        if (response.getStatus() == Status.TRY) {
             updateSession(response);
         }
         log.debug("TRYACCESS got {}", response);
@@ -97,7 +98,7 @@ public class PEP extends Server implements PEPInterface {
     }
 
     @Override
-    public final synchronized PepSession tryAccess(PepAccessRequest req) throws Exception {
+    public final synchronized PepSession tryAccess(PepRequest req) throws Exception {
         return tryAccess(req, null);
     }
 
@@ -152,7 +153,7 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized void onRecoverAccess(PepSession session) throws Exception {
         log.warn("" + session);
-        if (session.getStatus() != PepSession.Status.REVOKED && shouldRecoverAccess(session)) {
+        if (session.getStatus() != Status.REVOKED && shouldRecoverAccess(session)) {
             log.warn("recovering " + session);
             updateSession(session);
         } else {
@@ -180,7 +181,7 @@ public class PEP extends Server implements PEPInterface {
         log.info("ENDACCESS got {}" + response);
         // update necessary because someone could be holding this object and the status is changed!
         response = updateSession(response);
-        if(response.getDecision() == PepAccessResponse.DecisionEnum.Permit)
+        if(response.getDecision() == PepResponse.DecisionEnum.Permit)
             removeSession(response);
         return response;
     }
@@ -219,7 +220,7 @@ public class PEP extends Server implements PEPInterface {
                 Element e = (Element) d.importNode(sessionList.item(n), true);
                 d.appendChild(e);
                 PepSession pepSession = new PepSession(d);
-                if (pepSession.getDecision() != PepAccessResponse.DecisionEnum.Permit) {
+                if (pepSession.getDecision() != PepResponse.DecisionEnum.Permit) {
                     log.info("emulating the revocation of " + pepSession);
                     onRevokeAccess(pepSession);
                 } else {

@@ -7,7 +7,7 @@ package it.cnr.iit.retrail.client.impl;
 
 import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.client.PEPProtocol;
-import it.cnr.iit.retrail.commons.PepSession;
+import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
