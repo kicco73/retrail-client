@@ -47,7 +47,7 @@ public class PEPMediator implements PEPProtocol {
     }
 
     @Override
-    public synchronized Node revokeAccess(Node session) throws MalformedURLException {
+    public synchronized Node revokeAccess(Node session) throws Exception {
         PepSession pepSession = new PepSession((Document) session);
         // TODO: uconUrl ignored for now, assuming only one pdp.
         URL uconUrl = pepSession.getUconUrl();
