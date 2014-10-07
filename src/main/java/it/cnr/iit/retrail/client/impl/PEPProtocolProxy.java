@@ -21,7 +21,7 @@ public class PEPProtocolProxy implements PEPProtocol {
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override
-    public Node revokeAccess(Node pepSession) throws MalformedURLException {
+    public Node revokeAccess(Node pepSession) throws Exception {
         log.warn("{}", pepSession);
         return mediator.revokeAccess(pepSession);
     }
