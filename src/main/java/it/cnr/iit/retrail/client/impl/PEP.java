@@ -13,7 +13,6 @@ import it.cnr.iit.retrail.commons.impl.PepResponse;
 import it.cnr.iit.retrail.commons.impl.PepSession;
 import it.cnr.iit.retrail.commons.Server;
 import it.cnr.iit.retrail.commons.Status;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -34,6 +33,7 @@ public class PEP extends Server implements PEPInterface {
 
     protected final Client client;
     protected final Map<String, PepSession> sessions;
+    protected final Map<String, PepSession> sessionsbyCustomId;
     private boolean accessRecoverableByDefault;
     private boolean heartbeat = false;
 
@@ -49,6 +49,7 @@ public class PEP extends Server implements PEPInterface {
         accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
         sessions = new HashMap<>();
+        sessionsbyCustomId = new HashMap<>();
     }
 
     public void waitHeartbeat() {
@@ -76,12 +77,16 @@ public class PEP extends Server implements PEPInterface {
 
     @Override
     public final synchronized boolean hasSession(PepSession session) {
-        return sessions.containsKey(session.getUuid());
+        return sessions.containsKey(session.getUuid()) || 
+               sessionsbyCustomId.containsKey(session.getCustomId());
     }
     
     @Override
-    public final synchronized PepSession getSession(String uuid) {
-        return sessions.get(uuid);
+    public final synchronized PepSession getSession(String id) {
+        PepSession s = sessions.get(id);
+        if(s == null)
+            s = sessionsbyCustomId.get(id);
+        return s;
     }
 
     @Override
@@ -139,8 +144,10 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
         PepSession response = new PepSession(doc);
-        if(hasSession(response))
+        sessionsbyCustomId.remove(customId);
+        if(hasSession(response)) {
             response = updateSession(response);
+        }
         return response;
     }
 

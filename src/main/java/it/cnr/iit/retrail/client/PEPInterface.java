@@ -7,7 +7,6 @@ package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepSession;
-import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -128,13 +127,13 @@ public interface PEPInterface {
     /**
      * getSession()
      * 
-     * returns the session with the given uuid, if any.
+     * returns the session with the given UUID or customId, if any.
      * 
-     * @param uuid
-     * @return the PepSession for the given session id. May be null if
+     * @param id the UUID, or the customId.
+     * @return the PepSession for the given id. May be null if
      * the PEP does not handle this session.
      */
-    PepSession getSession(String uuid);
+    PepSession getSession(String id);
     
     /**
      * getSessions()
