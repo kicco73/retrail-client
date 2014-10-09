@@ -135,7 +135,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
-        log.warn("STARTACCESS GOT: {}", response);
+        log.debug("STARTACCESS GOT: {}", response);
         return updateSession(response);
     }
 
