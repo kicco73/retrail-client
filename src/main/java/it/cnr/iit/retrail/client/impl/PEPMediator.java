@@ -58,6 +58,7 @@ public class PEPMediator implements PEPProtocol {
                 try {
                     BeanUtils.copyProperties(found, pepSession);
                     listener.onRevokeAccess(found);
+                    listener.runObligations(found);
                     break;
                 } catch (Exception ex) {
                     log.error(ex.toString());

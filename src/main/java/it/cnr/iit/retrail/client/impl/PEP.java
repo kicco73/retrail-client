@@ -2,7 +2,6 @@
  * CNR - IIT
  * Coded by: 2014 Enrico "KMcC;) Carniani
  */
-
 package it.cnr.iit.retrail.client.impl;
 
 import it.cnr.iit.retrail.client.PEPInterface;
@@ -57,16 +56,17 @@ public class PEP extends Server implements PEPInterface {
         try {
             // Wait heartbeat for synchronization
             heartbeat = false;
-            synchronized(this) {
-                while(!heartbeat)
+            synchronized (this) {
+                while (!heartbeat) {
                     wait(watchdogPeriod);
+                }
             }
             log.warn("heartbeat ok");
         } catch (InterruptedException ex) {
             log.error(ex.getMessage());
         }
     }
-    
+
     @Override
     public void init() throws Exception {
         // register myself to event mediator since API instances will send events to listeners
@@ -77,15 +77,16 @@ public class PEP extends Server implements PEPInterface {
 
     @Override
     public final synchronized boolean hasSession(PepSession session) {
-        return sessions.containsKey(session.getUuid()) || 
-               sessionsbyCustomId.containsKey(session.getCustomId());
+        return sessions.containsKey(session.getUuid())
+                || sessionsbyCustomId.containsKey(session.getCustomId());
     }
-    
+
     @Override
     public final synchronized PepSession getSession(String id) {
         PepSession s = sessions.get(id);
-        if(s == null)
+        if (s == null) {
             s = sessionsbyCustomId.get(id);
+        }
         return s;
     }
 
@@ -94,11 +95,13 @@ public class PEP extends Server implements PEPInterface {
         log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
+        log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
         PepSession response = new PepSession(doc);
         if (response.getStatus() == Status.TRY) {
             updateSession(response);
         }
-        log.debug("TRYACCESS got {}", response);
+        log.info("TRYACCESS 4 got {}, obligations {}", response, response.getObligations());
+        runObligations(response);
         return response;
     }
 
@@ -109,18 +112,18 @@ public class PEP extends Server implements PEPInterface {
 
     private PepSession updateSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
         PepSession old = sessions.get(s.getUuid());
-        if(old == null)
+        if (old == null) {
             sessions.put(s.getUuid(), s);
-        else {
+        } else {
             BeanUtils.copyProperties(old, s);
         }
         return old;
     }
-    
+
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
         sessions.remove(s.getUuid());
     }
-    
+
     /**
      *
      * @return
@@ -129,13 +132,15 @@ public class PEP extends Server implements PEPInterface {
     public Collection<PepSession> getSessions() {
         return sessions.values();
     }
-    
+
     public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
         PepSession response = new PepSession(doc);
         log.debug("STARTACCESS GOT: {}", response);
+        log.info("STARTACCESS {}", DomUtils.toString(doc));
+        runObligations(response);
         return updateSession(response);
     }
 
@@ -145,7 +150,7 @@ public class PEP extends Server implements PEPInterface {
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
         PepSession response = new PepSession(doc);
         sessionsbyCustomId.remove(customId);
-        if(hasSession(response)) {
+        if (hasSession(response)) {
             response = updateSession(response);
         }
         return response;
@@ -180,16 +185,26 @@ public class PEP extends Server implements PEPInterface {
         endAccess(session);
     }
 
+    @Override
+    public synchronized void runObligations(PepSession session) throws Exception {
+        for (String obligation : session.getObligations()) {
+            onObligation(session, obligation);
+        }
+        session.getObligations().clear();
+    }
+
     public final synchronized PepSession endAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.endAccess", params);
         PepSession response = new PepSession(doc);
         log.info("ENDACCESS got {}" + response);
+        runObligations(response);
         // update necessary because someone could be holding this object and the status is changed!
         response = updateSession(response);
-        if(response.getDecision() == PepResponse.DecisionEnum.Permit)
+        if (response.getDecision() == PepResponse.DecisionEnum.Permit) {
             removeSession(response);
+        }
         return response;
     }
 
@@ -213,7 +228,7 @@ public class PEP extends Server implements PEPInterface {
     public void setAccessRecoverableByDefault(boolean accessRecoverableByDefault) {
         this.accessRecoverableByDefault = accessRecoverableByDefault;
     }
-    
+
     @Override
     protected synchronized void watchdog() throws InterruptedException {
         List<String> sessionsList = new ArrayList<>(sessions.keySet());
@@ -227,6 +242,7 @@ public class PEP extends Server implements PEPInterface {
                 Element e = (Element) d.importNode(sessionList.item(n), true);
                 d.appendChild(e);
                 PepSession pepSession = new PepSession(d);
+                runObligations(pepSession);
                 if (pepSession.getDecision() != PepResponse.DecisionEnum.Permit) {
                     log.info("emulating the revocation of " + pepSession);
                     onRevokeAccess(pepSession);
@@ -247,5 +263,10 @@ public class PEP extends Server implements PEPInterface {
         } catch (Exception ex) {
             log.error(ex.toString());
         }
+    }
+
+    @Override
+    public void onObligation(PepSession session, String obligation) throws Exception {
+        throw new UnsupportedOperationException("Not implemented.");
     }
 }

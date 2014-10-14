@@ -115,6 +115,20 @@ public interface PEPInterface {
     void onRevokeAccess(PepSession session) throws Exception;
     
     /**
+     * onObligation() executes the obligation sent by the server.
+     * The default implementation raises an UnsupportedOperationException,
+     * since obligations are mandatory. The extending class must implement
+     * this method if the ucon asks for some obligations to be satisfied.
+     * Obligation events are always executed after possible events on
+     * async calls (revocation), but before returning to the callee on sync 
+     * events.
+     * @param session requiring the obligation to be satisfied.
+     * @param obligation to be executed
+     * @throws Exception if something  went wrong.
+     */
+    void onObligation(PepSession session, String obligation) throws Exception;
+    
+    /**
      * hasSession()
      * 
      * tells if the given session is currently handled by this PEP.
@@ -193,4 +207,6 @@ public interface PEPInterface {
      * asked for interruption by the main program.
      */
     void term() throws InterruptedException;
+
+    public void runObligations(PepSession found) throws Exception;
 }
