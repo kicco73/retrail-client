@@ -200,6 +200,17 @@ public interface PEPInterface {
     boolean isAccessRecoverableByDefault();
     
     /**
+     * Run all the obligations attached to the current session. 
+     * Obligations are cleared after execution, so two subsequent calls
+     * behave correctly, without running obligations twice.
+     * Note: this method is intended for internal use only. User clients should
+     * not call it explicitly.
+     * @param session the session which the obligations must run for.
+     * @throws java.lang.Exception
+     */
+    void runObligations(PepSession session) throws Exception;
+
+    /**
      * term()
      * 
      * has to be called on PEP shutdown. Heartbeat will be terminated as well, 
@@ -209,6 +220,4 @@ public interface PEPInterface {
      * asked for interruption by the main program.
      */
     void term() throws InterruptedException;
-
-    public void runObligations(PepSession found) throws Exception;
 }
