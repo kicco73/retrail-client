@@ -7,6 +7,7 @@ package it.cnr.iit.retrail.client.impl;
 import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.commons.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
+import it.cnr.iit.retrail.commons.PepSessionInterface;
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepResponse;
 import it.cnr.iit.retrail.commons.impl.PepSession;
@@ -96,7 +97,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute("UCon.tryAccess", params);
         log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
-        PepSession response = new PepSession(doc);
+        PepSession response = newPepSession(doc);
         if (response.getStatus() == Status.TRY) {
             updateSession(response);
         }
@@ -137,7 +138,7 @@ public class PEP extends Server implements PEPInterface {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.startAccess", params);
-        PepSession response = new PepSession(doc);
+        PepSession response = newPepSession(doc);
         log.debug("STARTACCESS GOT: {}", response);
         log.info("STARTACCESS {}", DomUtils.toString(doc));
         runObligations(response);
@@ -148,7 +149,7 @@ public class PEP extends Server implements PEPInterface {
         log.debug("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
-        PepSession response = new PepSession(doc);
+        PepSession response = newPepSession(doc);
         sessionsbyCustomId.remove(customId);
         if (hasSession(response)) {
             response = updateSession(response);
@@ -197,7 +198,7 @@ public class PEP extends Server implements PEPInterface {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute("UCon.endAccess", params);
-        PepSession response = new PepSession(doc);
+        PepSession response = newPepSession(doc);
         log.info("ENDACCESS got {}" + response);
         runObligations(response);
         // update necessary because someone could be holding this object and the status is changed!
@@ -228,6 +229,10 @@ public class PEP extends Server implements PEPInterface {
     public void setAccessRecoverableByDefault(boolean accessRecoverableByDefault) {
         this.accessRecoverableByDefault = accessRecoverableByDefault;
     }
+    
+    protected PepSession newPepSession(Document d) throws Exception {
+        return new PepSession(d);
+    }
 
     @Override
     protected synchronized void watchdog() throws InterruptedException {
@@ -241,7 +246,7 @@ public class PEP extends Server implements PEPInterface {
                 Document d = DomUtils.newDocument();
                 Element e = (Element) d.importNode(sessionList.item(n), true);
                 d.appendChild(e);
-                PepSession pepSession = new PepSession(d);
+                PepSession pepSession = newPepSession(d);
                 runObligations(pepSession);
                 if (pepSession.getDecision() != PepResponse.DecisionEnum.Permit) {
                     log.info("emulating the revocation of " + pepSession);

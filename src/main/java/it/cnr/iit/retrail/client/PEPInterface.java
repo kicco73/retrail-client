@@ -5,9 +5,11 @@
 
 package it.cnr.iit.retrail.client;
 
+import it.cnr.iit.retrail.commons.PepSessionInterface;
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.util.Collection;
+import org.w3c.dom.Document;
 
 /**
  *
