@@ -7,7 +7,6 @@ package it.cnr.iit.retrail.client.impl;
 import it.cnr.iit.retrail.client.PEPInterface;
 import it.cnr.iit.retrail.commons.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
-import it.cnr.iit.retrail.commons.PepSessionInterface;
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepResponse;
 import it.cnr.iit.retrail.commons.impl.PepSession;
@@ -33,7 +32,7 @@ public class PEP extends Server implements PEPInterface {
 
     protected final Client client;
     protected final Map<String, PepSession> sessions;
-    protected final Map<String, PepSession> sessionsbyCustomId;
+    protected final Map<String, String> sessionNameByCustomId;
     private boolean accessRecoverableByDefault;
     private boolean heartbeat = false;
 
@@ -49,7 +48,7 @@ public class PEP extends Server implements PEPInterface {
         accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
         sessions = new HashMap<>();
-        sessionsbyCustomId = new HashMap<>();
+        sessionNameByCustomId = new HashMap<>();
     }
 
     public void waitHeartbeat() {
@@ -79,15 +78,14 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized boolean hasSession(PepSession session) {
         return sessions.containsKey(session.getUuid())
-                || sessionsbyCustomId.containsKey(session.getCustomId());
+                || sessionNameByCustomId.containsKey(session.getCustomId());
     }
 
     @Override
     public final synchronized PepSession getSession(String id) {
+        String uuid = sessionNameByCustomId.get(id);
+        id = uuid != null? uuid : id;
         PepSession s = sessions.get(id);
-        if (s == null) {
-            s = sessionsbyCustomId.get(id);
-        }
         return s;
     }
 
@@ -150,7 +148,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute("UCon.assignCustomId", params);
         PepSession response = newPepSession(doc);
-        sessionsbyCustomId.remove(customId);
+        sessionNameByCustomId.remove(customId);
         if (hasSession(response)) {
             response = updateSession(response);
         }
