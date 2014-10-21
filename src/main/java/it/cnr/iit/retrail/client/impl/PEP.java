@@ -77,8 +77,7 @@ public class PEP extends Server implements PEPInterface {
 
     @Override
     public final synchronized boolean hasSession(PepSession session) {
-        return sessions.containsKey(session.getUuid())
-                || sessionNameByCustomId.containsKey(session.getCustomId());
+        return sessions.containsKey(session.getUuid());
     }
 
     @Override
@@ -114,8 +113,10 @@ public class PEP extends Server implements PEPInterface {
         if (old == null) {
             sessions.put(s.getUuid(), s);
         } else {
+            sessionNameByCustomId.remove(old.getCustomId());
             BeanUtils.copyProperties(old, s);
         }
+        sessionNameByCustomId.put(s.getCustomId(), s.getUuid());
         return old;
     }
 
