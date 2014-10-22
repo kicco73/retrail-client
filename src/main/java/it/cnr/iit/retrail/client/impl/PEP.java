@@ -121,7 +121,9 @@ public class PEP extends Server implements PEPInterface {
     }
 
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
+        sessionNameByCustomId.remove(s.getCustomId());
         sessions.remove(s.getUuid());
+        s.setStatus(Status.DELETED);
     }
 
     /**
@@ -248,10 +250,10 @@ public class PEP extends Server implements PEPInterface {
                 PepSession pepSession = newPepSession(d);
                 runObligations(pepSession);
                 if (pepSession.getDecision() != PepResponse.DecisionEnum.Permit) {
-                    log.info("emulating the revocation of " + pepSession);
+                    log.warn("emulating the revocation of " + pepSession);
                     onRevokeAccess(pepSession);
                 } else {
-                    log.info("recovering " + pepSession);
+                    log.warn("recovering " + pepSession);
                     onRecoverAccess(pepSession);
                 }
             }
