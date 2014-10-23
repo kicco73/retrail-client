@@ -11,6 +11,7 @@ import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,9 @@ public class PEPMediator implements PEPProtocol {
             found = listener.getSession(pepSession.getUuid());
             if (found != null) {
                 try {
+                    Map<String,Object> savedLocalInfo = found.getLocalInfo();
                     BeanUtils.copyProperties(found, pepSession);
+                    found.setLocalInfo(savedLocalInfo);
                     listener.onRevokeAccess(found);
                     listener.runObligations(found);
                     break;
