@@ -114,7 +114,9 @@ public class PEP extends Server implements PEPInterface {
             sessions.put(s.getUuid(), s);
         } else {
             sessionNameByCustomId.remove(old.getCustomId());
+            Map<String,Object> savedLocalInfo = old.getLocalInfo();
             BeanUtils.copyProperties(old, s);
+            old.setLocalInfo(savedLocalInfo);
         }
         sessionNameByCustomId.put(s.getCustomId(), s.getUuid());
         return old;
