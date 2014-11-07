@@ -6,7 +6,6 @@
 package it.cnr.iit.retrail.client.impl;
 
 import it.cnr.iit.retrail.client.PEPProtocol;
-import java.net.MalformedURLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
