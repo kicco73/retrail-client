@@ -244,8 +244,11 @@ public class PEP extends Server implements PEPInterface {
         Document doc;
         try {
             doc = (Document) client.execute("UCon.heartbeat", params);
-            Element config = (Element) doc.getElementsByTagName("Config").item(0);
-            watchdogPeriod = Integer.parseInt(config.getAttribute("watchdogPeriod"));
+            NodeList configs = doc.getElementsByTagName("Config");
+            if(configs != null) {
+                Element config = (Element) configs.item(0);
+                watchdogPeriod = Integer.parseInt(config.getAttribute("watchdogPeriod"));
+            }
             NodeList sessionList = doc.getElementsByTagName("Response");
             for (int n = 0; n < sessionList.getLength(); n++) {
                 Document d = DomUtils.newDocument();
@@ -271,7 +274,8 @@ public class PEP extends Server implements PEPInterface {
         } catch (InterruptedException e) {
             throw e;
         } catch (Exception ex) {
-            log.error(ex.toString());
+            ex.printStackTrace();
+            //log.error(ex.toString());
         }
     }
 
