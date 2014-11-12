@@ -25,4 +25,9 @@ public class PEPProtocolProxy implements PEPProtocol {
         return mediator.revokeAccess(pepSession);
     }
 
+    @Override
+    public Node runObligations(Node pepSession) throws Exception {
+        log.warn("{}", pepSession);
+        return mediator.runObligations(pepSession);
+    }
 }

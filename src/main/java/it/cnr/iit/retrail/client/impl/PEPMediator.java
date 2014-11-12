@@ -75,4 +75,32 @@ public class PEPMediator implements PEPProtocol {
         return null;
     }
 
+    @Override
+    public synchronized Node runObligations(Node session) throws Exception {
+        PepSession pepSession = new PepSession((Document) session);
+        // TODO: uconUrl ignored for now, assuming only one pdp.
+        URL uconUrl = pepSession.getUconUrl();
+        PepSession found = null;
+
+        for (PEPInterface listener : listeners) {
+            found = listener.getSession(pepSession.getUuid());
+            if (found != null) {
+                try {
+                    Map<String,Object> savedLocalInfo = found.getLocalInfo();
+                    BeanUtils.copyProperties(found, pepSession);
+                    found.setLocalInfo(savedLocalInfo);
+                    listener.runObligations(found);
+                    break;
+                } catch (Exception ex) {
+                    log.error(ex.toString());
+                }
+            }
+        }
+
+        if (found == null) {
+            log.error("UNEXISTENT SESSION: " + pepSession);
+        }
+        return null;
+    }
+
 }

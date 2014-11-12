@@ -9,4 +9,5 @@ import org.w3c.dom.Node;
 
 public interface PEPProtocol {
     Node revokeAccess(Node pepSession) throws Exception;
+    Node runObligations(Node pepSession) throws Exception;
 }

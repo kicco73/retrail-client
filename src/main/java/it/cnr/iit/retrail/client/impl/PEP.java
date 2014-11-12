@@ -244,8 +244,9 @@ public class PEP extends Server implements PEPInterface {
         Document doc;
         try {
             doc = (Document) client.execute("UCon.heartbeat", params);
+            log.debug("received heartbeat: {}", DomUtils.toString(doc.getDocumentElement()));
             NodeList configs = doc.getElementsByTagName("Config");
-            if(configs != null) {
+            if(configs.getLength() > 0) {
                 Element config = (Element) configs.item(0);
                 watchdogPeriod = Integer.parseInt(config.getAttribute("watchdogPeriod"));
             }
