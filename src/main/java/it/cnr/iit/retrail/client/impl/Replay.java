@@ -29,9 +29,10 @@ public class Replay implements Runnable {
     Thread thread;
     PEPInterface pep;
 
-    public synchronized void play(File inputFile) throws Exception {
+    public synchronized void play(File inputFile, PEPInterface pep) throws Exception {
         stop();
         doc = DomUtils.read(inputFile);
+        this.pep = pep;
         thread = new Thread(this, "Recorder playback");
         thread.start();
     }
