@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 
 public class PEP extends Server implements PEPInterface {
 
-    protected final Client client;
+    public final Client client;
     protected final Map<String, PepSession> sessions;
     protected final Map<String, String> sessionNameByCustomId;
     private boolean accessRecoverableByDefault;

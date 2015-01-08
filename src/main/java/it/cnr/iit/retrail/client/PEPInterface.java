@@ -7,6 +7,7 @@ package it.cnr.iit.retrail.client;
 
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepSession;
+import java.io.File;
 import java.util.Collection;
 
 /**
@@ -207,7 +208,7 @@ public interface PEPInterface {
      * @throws java.lang.Exception
      */
     void runObligations(PepSession session) throws Exception;
-
+    
     /**
      * term()
      * 
