@@ -11,7 +11,6 @@ import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -39,9 +38,11 @@ public class Replay implements Runnable {
 
     public synchronized void stop() throws Exception {
         if (thread != null) {
+            log.warn("stopping playback of recorded retrail method calls");
             thread.interrupt();
-            thread.wait();
+            thread.join();
             thread = null;
+            log.warn("stopped playback");
         }
     }
 
@@ -49,39 +50,39 @@ public class Replay implements Runnable {
         log.warn("starting playback of recorded retrail method calls");
         long millis = 0;
         NodeList nl = doc.getElementsByTagName("record");
+        log.info("found {} records", nl.getLength());
         Map<String,String> uuidMap = new HashMap<>();
         for (int i = 0; i < nl.getLength(); i++) {
             try {
+                log.info("executing record {}", i);
                 Element record = (Element) nl.item(i);
                 long ms = Long.parseLong(record.getAttribute("ms"));
-                Element methodCall = (Element) record.getFirstChild();
+                Element methodCall = (Element) record.getElementsByTagName("methodCall").item(0);
                 String methodName = methodCall.getElementsByTagName("methodName").item(0).getTextContent();
                 NodeList params = methodCall.getElementsByTagName("param");
                 log.info("waiting {} ms before running {}", ms-millis, methodName);
                 Thread.sleep(ms-millis);
                 millis = ms;                
-                log.info("running: {}", methodName);
-                Element methodResponse = (Element) record.getLastChild();
+                Element methodResponse = (Element) record.getElementsByTagName("methodResponse").item(0);
                 Element session = (Element) methodResponse.getElementsByTagName("Session").item(0);
+                String uuid = session.getAttribute("uuid");
+                log.info("running: {}, session: {}", methodName, uuid);
                 switch(methodName) {
                     case "UCon.tryAccess": {
                         Element request = (Element) methodCall.getElementsByTagName("Request").item(0);
                         String customId = params.item(2).getTextContent();
                         PepRequest req = new PepRequest(request);
                         PepSession pepSession = pep.tryAccess(req, customId);
-                        String uuid = session.getAttribute("uuid");
                         uuidMap.put(uuid, pepSession.getUuid());
                         break;
                     }
                     case "UCon.startAccess": {
-                        String uuid = params.item(0).getTextContent();
                         String customId = params.item(1).getTextContent();
                         PepSession pepSession = pep.getSession(uuid != null? uuidMap.get(uuid) : customId);
                         pep.startAccess(pepSession);
                         break;
                     }
                     case "UCon.endAccess": {
-                        String uuid = params.item(0).getTextContent();
                         String customId = params.item(1).getTextContent();
                         PepSession pepSession = pep.getSession(uuid != null? uuidMap.get(uuid) : customId);
                         pep.endAccess(pepSession);
