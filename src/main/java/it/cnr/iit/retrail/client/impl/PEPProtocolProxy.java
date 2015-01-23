@@ -20,14 +20,14 @@ public class PEPProtocolProxy implements PEPProtocol {
     protected static final PEPMediator mediator = PEPMediator.getInstance();
 
     @Override
-    public Node revokeAccess(Node pepSession) throws Exception {
-        log.warn("{}", pepSession);
-        return mediator.revokeAccess(pepSession);
+    public Node revokeAccess(Node pepSessions) throws Exception {
+        log.warn("{}", pepSessions);
+        return mediator.revokeAccess(pepSessions);
     }
 
     @Override
-    public Node runObligations(Node pepSession) throws Exception {
-        log.warn("{}", pepSession);
-        return mediator.runObligations(pepSession);
+    public Node runObligations(Node pepSessions) throws Exception {
+        log.warn("{}", pepSessions);
+        return mediator.runObligations(pepSessions);
     }
 }
