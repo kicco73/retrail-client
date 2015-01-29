@@ -15,6 +15,8 @@ import it.cnr.iit.retrail.commons.Status;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,8 +44,10 @@ public class PEP extends Server implements PEPInterface {
      * @param myUrl
      * @throws java.net.UnknownHostException
      * @throws org.apache.xmlrpc.XmlRpcException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.KeyManagementException
      */
-    public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException {
+    public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException, NoSuchAlgorithmException, KeyManagementException {
         super(myUrl, PEPProtocolProxy.class, "PEP");
         accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
