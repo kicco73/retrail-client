@@ -9,6 +9,7 @@ import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -85,6 +86,7 @@ public interface PEPInterface {
      * @throws Exception if something went wrong. 
      */
     PepSession endAccess(PepSession session) throws Exception;
+    List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception;
 
     /**
      * onRecoverAccess()

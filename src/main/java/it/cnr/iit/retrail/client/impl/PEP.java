@@ -42,12 +42,9 @@ public class PEP extends Server implements PEPInterface {
      *
      * @param pdpUrl
      * @param myUrl
-     * @throws java.net.UnknownHostException
-     * @throws org.apache.xmlrpc.XmlRpcException
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.KeyManagementException
+     * @throws java.lang.Exception
      */
-    public PEP(URL pdpUrl, URL myUrl) throws XmlRpcException, UnknownHostException, NoSuchAlgorithmException, KeyManagementException {
+    public PEP(URL pdpUrl, URL myUrl) throws Exception {
         super(myUrl, PEPProtocolProxy.class, "PEP");
         accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
@@ -87,7 +84,7 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized PepSession getSession(String id) {
         String uuid = sessionNameByCustomId.get(id);
-        id = uuid != null? uuid : id;
+        id = uuid != null ? uuid : id;
         PepSession s = sessions.get(id);
         return s;
     }
@@ -119,7 +116,7 @@ public class PEP extends Server implements PEPInterface {
             old = s;
         } else {
             sessionNameByCustomId.remove(old.getCustomId());
-            Map<String,Object> savedLocalInfo = old.getLocalInfo();
+            Map<String, Object> savedLocalInfo = old.getLocalInfo();
             BeanUtils.copyProperties(old, s);
             old.setLocalInfo(savedLocalInfo);
         }
@@ -204,17 +201,32 @@ public class PEP extends Server implements PEPInterface {
 
     public final synchronized PepSession endAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
-        Object[] params = new Object[]{uuid, customId};
+        List<String> uuidList = new ArrayList<>(1);
+        uuidList.add(uuid);
+        List<String> customIdList = new ArrayList<>(1);
+        customIdList.add(customId);
+        List<PepSession> responses = endAccess(uuidList, customIdList);
+        return responses.get(0);
+    }
+
+    @Override
+    public final synchronized List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception {
+        Object[] params = new Object[]{uuidList, customIdList};
         Document doc = (Document) client.execute("UCon.endAccess", params);
-        PepSession response = newPepSession(doc);
-        log.info("ENDACCESS got {}" + response);
-        runObligations(response);
-        // update necessary because someone could be holding this object and the status is changed!
-        response = updateSession(response);
-        if (response.getDecision() == PepResponse.DecisionEnum.Permit) {
-            removeSession(response);
+        NodeList responses = doc.getElementsByTagName("Response");
+        List<PepSession> pepSessions = new ArrayList<>(responses.getLength());
+        for (int r = 0; r < responses.getLength(); r++) {
+            PepSession response = newPepSession((Element) responses.item(r));
+            log.info("ENDACCESS got {}" + response);
+            runObligations(response);
+            // update necessary because someone could be holding this object and the status is changed!
+            response = updateSession(response);
+            if (response.getDecision() == PepResponse.DecisionEnum.Permit) {
+                removeSession(response);
+            }
+            pepSessions.add(response);
         }
-        return response;
+        return pepSessions;
     }
 
     @Override
@@ -237,9 +249,13 @@ public class PEP extends Server implements PEPInterface {
     public void setAccessRecoverableByDefault(boolean accessRecoverableByDefault) {
         this.accessRecoverableByDefault = accessRecoverableByDefault;
     }
-    
+
     protected PepSession newPepSession(Document d) throws Exception {
         return new PepSession(d);
+    }
+
+    protected PepSession newPepSession(Element e) throws Exception {
+        return new PepSession(e);
     }
 
     @Override
@@ -251,7 +267,7 @@ public class PEP extends Server implements PEPInterface {
             doc = (Document) client.execute("UCon.heartbeat", params);
             log.debug("received heartbeat: {}", DomUtils.toString(doc.getDocumentElement()));
             NodeList configs = doc.getElementsByTagName("Config");
-            if(configs.getLength() > 0) {
+            if (configs.getLength() > 0) {
                 Element config = (Element) configs.item(0);
                 watchdogPeriod = Integer.parseInt(config.getAttribute("watchdogPeriod"));
             }
