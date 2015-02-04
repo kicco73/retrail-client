@@ -86,7 +86,7 @@ public interface PEPInterface {
      * @throws Exception if something went wrong. 
      */
     PepSession endAccess(PepSession session) throws Exception;
-    List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception;
+    List<PepSession> endAccess(List<PepSession> sessions) throws Exception;
 
     /**
      * onRecoverAccess()

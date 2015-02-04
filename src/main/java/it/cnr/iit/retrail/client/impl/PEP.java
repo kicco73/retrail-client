@@ -196,17 +196,23 @@ public class PEP extends Server implements PEPInterface {
         session.getObligations().clear();
     }
 
+    // Protected for testing purposes
     public final synchronized PepSession endAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
-        List<String> uuidList = new ArrayList<>(1);
-        uuidList.add(uuid);
-        List<String> customIdList = new ArrayList<>(1);
-        customIdList.add(customId);
-        List<PepSession> responses = endAccess(uuidList, customIdList);
-        return responses.get(0);
+        Object[] params = new Object[]{uuid, customId};
+        Node responseDocument = (Node) client.execute("UCon.endAccess", params);
+        PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
+        log.info("ENDACCESS got {}" + response);
+        runObligations(response);
+        // update necessary because someone could be holding this object and the status is changed!
+        response = updateSession(response);
+        if (response.getDecision() == PepResponse.DecisionEnum.Permit) {
+            removeSession(response);
+        }
+        return response;
     }
 
-    @Override
+    // for testing purposes
     public final synchronized List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception {
         Object[] params = new Object[]{uuidList, customIdList};
         Object[] responses = (Object[]) client.execute("UCon.endAccess", params);
@@ -228,6 +234,17 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized PepSession endAccess(PepSession session) throws Exception {
         return endAccess(session.getUuid(), session.getCustomId());
+    }
+    
+    @Override
+    public final synchronized List<PepSession> endAccess(List<PepSession> sessions) throws Exception {
+        List<String> uuidList = new ArrayList<>(sessions.size());
+        List<String> customIdList = new ArrayList<>(sessions.size());
+        for(PepSession session: sessions) {
+            uuidList.add(session.getUuid());
+            customIdList.add(session.getCustomId());
+        }
+        return endAccess(uuidList, customIdList);
     }
 
     public synchronized Node echo(Node node) throws Exception {
