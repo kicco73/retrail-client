@@ -1,6 +1,6 @@
 /*
  * CNR - IIT
- * Coded by: 2014 Enrico "KMcC;) Carniani
+ * Coded by: 2014-2015 Enrico "KMcC;) Carniani
  */
 package it.cnr.iit.retrail.client.impl;
 
@@ -11,14 +11,13 @@ import it.cnr.iit.retrail.commons.impl.PepSession;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Handles events from the APIs exposed by the web server and dispatches them to
@@ -49,20 +48,13 @@ public class PEPMediator implements PEPProtocol {
     }
 
     @Override
-    public synchronized Node revokeAccess(Node sessions) throws Exception {
-        NodeList sl = ((Document) sessions).getDocumentElement().getElementsByTagName("Response");
-        for (int index = 0; index < sl.getLength(); index++) {
-            Node session = sl.item(index);
-            Document doc = DomUtils.newDocument();
-            session = doc.adoptNode(session);
-            assert(session != null);
-            doc.appendChild(session);
+    public synchronized List<Node> revokeAccess(List<Node> sessions) throws Exception {
+        for (Node session: sessions) {
             log.error("ECCOCI: {}", DomUtils.toString(session));
-            PepSession pepSession = new PepSession(doc);
+            PepSession pepSession = new PepSession((Document) session);
             // TODO: uconUrl ignored for now, assuming only one pdp.
             URL uconUrl = pepSession.getUconUrl();
             PepSession found = null;
-
             for (PEPInterface listener : listeners) {
                 found = listener.getSession(pepSession.getUuid());
                 if (found != null) {
@@ -87,14 +79,9 @@ public class PEPMediator implements PEPProtocol {
     }
 
     @Override
-    public synchronized Node runObligations(Node sessions) throws Exception {
-        NodeList sl = ((Document) sessions).getDocumentElement().getElementsByTagName("Response");
-        for (int index = 0; index < sl.getLength(); index++) {
-            Node session = sl.item(index);
-            Document doc = DomUtils.newDocument();
-            session = doc.adoptNode(session);
-            doc.appendChild(session);
-            PepSession pepSession = new PepSession(doc);
+    public synchronized List<Node> runObligations(List<Node> sessions) throws Exception {
+        for (Node session: sessions) {
+            PepSession pepSession = new PepSession((Document) session);
             // TODO: uconUrl ignored for now, assuming only one pdp.
             URL uconUrl = pepSession.getUconUrl();
             PepSession found = null;

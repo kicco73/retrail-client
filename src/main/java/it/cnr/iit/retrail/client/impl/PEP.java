@@ -1,6 +1,6 @@
 /* 
  * CNR - IIT
- * Coded by: 2014 Enrico "KMcC;) Carniani
+ * Coded by: 2014-2015 Enrico "KMcC;) Carniani
  */
 package it.cnr.iit.retrail.client.impl;
 
@@ -209,11 +209,10 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception {
         Object[] params = new Object[]{uuidList, customIdList};
-        Document doc = (Document) client.execute("UCon.endAccess", params);
-        NodeList responses = doc.getElementsByTagName("Response");
-        List<PepSession> pepSessions = new ArrayList<>(responses.getLength());
-        for (int r = 0; r < responses.getLength(); r++) {
-            PepSession response = newPepSession((Element) responses.item(r));
+        Object[] responses = (Object[]) client.execute("UCon.endAccess", params);
+        List<PepSession> pepSessions = new ArrayList<>(responses.length);
+        for(Object responseDocument: responses) {
+            PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
             log.info("ENDACCESS got {}" + response);
             runObligations(response);
             // update necessary because someone could be holding this object and the status is changed!
