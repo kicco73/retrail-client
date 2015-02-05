@@ -5,13 +5,15 @@
 package it.cnr.iit.retrail.client.impl;
 
 import it.cnr.iit.retrail.client.PEPInterface;
-import it.cnr.iit.retrail.commons.Client;
+import it.cnr.iit.retrail.commons.impl.Client;
 import it.cnr.iit.retrail.commons.DomUtils;
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepResponse;
 import it.cnr.iit.retrail.commons.impl.PepSession;
 import it.cnr.iit.retrail.commons.Server;
 import it.cnr.iit.retrail.commons.Status;
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.net.ssl.SSLContext;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.xmlrpc.XmlRpcException;
@@ -29,7 +32,7 @@ import org.w3c.dom.NodeList;
 
 public class PEP extends Server implements PEPInterface {
 
-    public final Client client;
+    protected final Client client;
     protected final Map<String, PepSession> sessions;
     protected final Map<String, String> sessionNameByCustomId;
     private boolean accessRecoverableByDefault;
@@ -305,17 +308,54 @@ public class PEP extends Server implements PEPInterface {
             heartbeat = true;
             notifyAll();
         } catch (XmlRpcException | ParserConfigurationException ex) {
-            log.error(ex.toString());
+            log.error("while parsing heartbeat response: {}", ex.toString());
         } catch (InterruptedException e) {
             throw e;
         } catch (Exception ex) {
-            ex.printStackTrace();
-            //log.error(ex.toString());
+            log.error("unexpected exception: {}", ex.toString());
         }
     }
 
     @Override
     public void onObligation(PepSession session, String obligation) throws Exception {
         throw new UnsupportedOperationException("Not implemented.");
+    }
+
+    @Override
+    public void startRecording(File outputFile) throws Exception {
+        client.startRecording(outputFile);
+    }
+    
+    @Override
+    public void continueRecording(File outputFile) throws Exception {
+        client.continueRecording(outputFile);
+    }
+
+    @Override
+    public boolean isRecording() {
+        return client.isRecording();
+    }
+    
+    @Override
+    public void stopRecording() {
+        client.stopRecording();
+    }
+
+    @Override
+    public SSLContext trustAllPeers() throws Exception {
+        return client.trustAllPeers();
+    }
+
+    @Override
+    public SSLContext trustAllPeers(InputStream keyStore, String password) throws Exception {
+        trustAllPeers();
+        return super.trustAllPeers(keyStore, password);
+    }
+    
+    @Override
+    public void term() throws InterruptedException {
+        if(isRecording())
+            stopRecording();
+        super.term();
     }
 }

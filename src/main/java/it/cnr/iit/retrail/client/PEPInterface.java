@@ -5,9 +5,9 @@
 
 package it.cnr.iit.retrail.client;
 
+import it.cnr.iit.retrail.commons.RecorderInterface;
 import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepSession;
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author oneadmin
  */
-public interface PEPInterface {
+public interface PEPInterface extends RecorderInterface {
 
     /**
      * init()
