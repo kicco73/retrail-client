@@ -327,8 +327,8 @@ public class PEP extends Server implements PEPInterface {
     }
     
     @Override
-    public void continueRecording(File outputFile) throws Exception {
-        client.continueRecording(outputFile);
+    public void continueRecording(File outputFile, long millis) throws Exception {
+        client.continueRecording(outputFile, millis);
     }
 
     @Override
