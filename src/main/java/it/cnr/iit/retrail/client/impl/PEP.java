@@ -35,6 +35,7 @@ public class PEP extends Server implements PEPInterface {
     protected final Client client;
     protected final Map<String, PepSession> sessions;
     protected final Map<String, String> sessionNameByCustomId;
+    private final String uconInterfaceName;
     private boolean accessRecoverableByDefault;
     private boolean heartbeat = false;
 
@@ -50,6 +51,7 @@ public class PEP extends Server implements PEPInterface {
         client = new Client(pdpUrl);
         sessions = new HashMap<>();
         sessionNameByCustomId = new HashMap<>();
+        uconInterfaceName = pdpUrl.getProtocol().equals("https")? "UConS" : "UCon";
     }
 
     public void waitHeartbeat() {
@@ -93,7 +95,7 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized PepSession tryAccess(PepRequest req, String customId) throws Exception {
         log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
-        Document doc = (Document) client.execute("UCon.tryAccess", params);
+        Document doc = (Document) client.execute(uconInterfaceName+".tryAccess", params);
         log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
         PepSession response = newPepSession(doc);
         if (response.getStatus() == Status.TRY) {
@@ -142,7 +144,7 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
-        Document doc = (Document) client.execute("UCon.startAccess", params);
+        Document doc = (Document) client.execute(uconInterfaceName+".startAccess", params);
         PepSession response = newPepSession(doc);
         log.debug("STARTACCESS GOT: {}", response);
         log.info("STARTACCESS {}", DomUtils.toString(doc));
@@ -153,7 +155,7 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized PepSession assignCustomId(String uuid, String customId, String newCustomId) throws Exception {
         log.debug("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
-        Document doc = (Document) client.execute("UCon.assignCustomId", params);
+        Document doc = (Document) client.execute(uconInterfaceName+".assignCustomId", params);
         PepSession response = newPepSession(doc);
         sessionNameByCustomId.remove(customId);
         if (hasSession(response)) {
@@ -203,7 +205,7 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized PepSession endAccess(String uuid, String customId) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
         Object[] params = new Object[]{uuid, customId};
-        Node responseDocument = (Node) client.execute("UCon.endAccess", params);
+        Node responseDocument = (Node) client.execute(uconInterfaceName+".endAccess", params);
         PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
         log.info("ENDACCESS got {}" + response);
         runObligations(response);
@@ -218,7 +220,7 @@ public class PEP extends Server implements PEPInterface {
     // for testing purposes
     public final synchronized List<PepSession> endAccess(List<String> uuidList, List<String> customIdList) throws Exception {
         Object[] params = new Object[]{uuidList, customIdList};
-        Object[] responses = (Object[]) client.execute("UCon.endAccess", params);
+        Object[] responses = (Object[]) client.execute(uconInterfaceName+".endAccess", params);
         List<PepSession> pepSessions = new ArrayList<>(responses.length);
         for(Object responseDocument: responses) {
             PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
@@ -253,7 +255,7 @@ public class PEP extends Server implements PEPInterface {
     public synchronized Node echo(Node node) throws Exception {
         log.info("");
         Object[] params = new Object[]{node};
-        return (Node) client.execute("UCon.echo", params);
+        return (Node) client.execute(uconInterfaceName+".echo", params);
     }
 
     @Override
@@ -280,7 +282,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{myUrl.toString(), sessionsList};
         Document doc;
         try {
-            doc = (Document) client.execute("UCon.heartbeat", params);
+            doc = (Document) client.execute(uconInterfaceName+".heartbeat", params);
             log.debug("received heartbeat: {}", DomUtils.toString(doc.getDocumentElement()));
             NodeList configs = doc.getElementsByTagName("Config");
             if (configs.getLength() > 0) {
