@@ -61,7 +61,7 @@ public class PEP extends Server implements PEPInterface {
             heartbeat = false;
             synchronized (this) {
                 while (!heartbeat) {
-                    wait(watchdogPeriod);
+                    wait(getWatchdogPeriod());
                 }
             }
             log.warn("heartbeat ok");
@@ -156,10 +156,13 @@ public class PEP extends Server implements PEPInterface {
         log.debug("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
         Document doc = (Document) client.execute(uconInterfaceName+".assignCustomId", params);
-        PepSession response = newPepSession(doc);
-        sessionNameByCustomId.remove(customId);
-        if (hasSession(response)) {
-            response = updateSession(response);
+        PepSession response = null;
+        if(doc != null && (doc instanceof Document)) {
+            response = newPepSession(doc);
+            sessionNameByCustomId.remove(customId);
+            if (hasSession(response)) {
+                response = updateSession(response);
+            }
         }
         return response;
     }
@@ -284,12 +287,12 @@ public class PEP extends Server implements PEPInterface {
         try {
             doc = (Document) client.execute(uconInterfaceName+".heartbeat", params);
             log.debug("received heartbeat: {}", DomUtils.toString(doc.getDocumentElement()));
-            NodeList configs = doc.getElementsByTagName("Config");
+            NodeList configs = doc.getElementsByTagNameNS("*", "Config");
             if (configs.getLength() > 0) {
                 Element config = (Element) configs.item(0);
-                watchdogPeriod = Integer.parseInt(config.getAttribute("watchdogPeriod"));
+                setWatchdogPeriod(Integer.parseInt(config.getAttribute("watchdogPeriod")));
             }
-            NodeList sessionList = doc.getElementsByTagName("Response");
+            NodeList sessionList = doc.getElementsByTagNameNS("*", "Response");
             for (int n = 0; n < sessionList.getLength(); n++) {
                 Document d = DomUtils.newDocument();
                 Element e = (Element) d.importNode(sessionList.item(n), true);

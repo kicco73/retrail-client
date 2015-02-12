@@ -64,12 +64,12 @@ public class Replay implements Runnable {
                 Thread.sleep(ms-millis);
                 millis = ms;                
                 Element methodResponse = (Element) record.getElementsByTagName("methodResponse").item(0);
-                Element session = (Element) methodResponse.getElementsByTagName("Session").item(0);
+                Element session = (Element) methodResponse.getElementsByTagNameNS("*", "Session").item(0);
                 String uuid = session.getAttribute("uuid");
                 log.info("running: {}, session: {}", methodName, uuid);
                 switch(methodName) {
                     case "UCon.tryAccess": {
-                        Element request = (Element) methodCall.getElementsByTagName("Request").item(0);
+                        Element request = (Element) methodCall.getElementsByTagNameNS("*", "Request").item(0);
                         String customId = params.item(2).getTextContent();
                         PepRequest req = new PepRequest(request);
                         PepSession pepSession = pep.tryAccess(req, customId);
