@@ -74,7 +74,7 @@ public class PEPMediator implements PEPProtocol {
                 log.error("UNEXISTENT SESSION: " + pepSession);
             }
         }
-
+        log.warn("revocation done");
         return null;
     }
 

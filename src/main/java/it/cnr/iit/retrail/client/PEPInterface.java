@@ -221,4 +221,6 @@ public interface PEPInterface extends RecorderInterface {
      * asked for interruption by the main program.
      */
     void term() throws InterruptedException;
+    
+    void applyChanges(PepSession s, PepRequest r) throws Exception;
 }

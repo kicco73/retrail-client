@@ -243,7 +243,13 @@ public class PEP extends Server implements PEPInterface {
     public final synchronized PepSession endAccess(PepSession session) throws Exception {
         return endAccess(session.getUuid(), session.getCustomId());
     }
-    
+
+    @Override
+    public final synchronized void applyChanges(PepSession session, PepRequest req) throws Exception {
+        Object[] params = new Object[]{req.toElement(), session.getUuid()};
+        client.execute(uconInterfaceName+".applyChanges", params);
+    }
+
     @Override
     public final synchronized List<PepSession> endAccess(List<PepSession> sessions) throws Exception {
         List<String> uuidList = new ArrayList<>(sessions.size());
