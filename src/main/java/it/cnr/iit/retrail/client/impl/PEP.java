@@ -96,12 +96,12 @@ public class PEP extends Server implements PEPInterface {
         log.debug("" + req);
         Object[] params = new Object[]{req.toElement(), myUrl.toString(), customId};
         Document doc = (Document) client.execute(uconInterfaceName+".tryAccess", params);
-        log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
+        //log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
         PepSession response = newPepSession(doc);
         if (response.getStatus() != Status.END) { // FIXME was == TRY
             updateSession(response);
         }
-        log.info("TRYACCESS 4 got {}, obligations {}", response, response.getObligations());
+        //log.info("TRYACCESS got {}, obligations {}", response, response.getObligations());
         runObligations(response);
         return response;
     }
@@ -146,8 +146,8 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Document doc = (Document) client.execute(uconInterfaceName+".startAccess", params);
         PepSession response = newPepSession(doc);
-        log.debug("STARTACCESS GOT: {}", response);
-        log.info("STARTACCESS {}", DomUtils.toString(doc));
+        //log.info("STARTACCESS GOT: {} OBLIGATIONS: {}", response, response.getObligations());
+        //log.info("STARTACCESS {}", DomUtils.toString(doc));
         runObligations(response);
         return updateSession(response);
     }
@@ -210,7 +210,7 @@ public class PEP extends Server implements PEPInterface {
         Object[] params = new Object[]{uuid, customId};
         Node responseDocument = (Node) client.execute(uconInterfaceName+".endAccess", params);
         PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
-        log.info("ENDACCESS got {}" + response);
+        //log.info("ENDACCESS got {}" + response);
         runObligations(response);
         // update necessary because someone could be holding this object and the status is changed!
         response = updateSession(response);
@@ -227,7 +227,7 @@ public class PEP extends Server implements PEPInterface {
         List<PepSession> pepSessions = new ArrayList<>(responses.length);
         for(Object responseDocument: responses) {
             PepSession response = newPepSession(((Document) responseDocument).getDocumentElement());
-            log.info("ENDACCESS got {}" + response);
+            //log.info("ENDACCESS got {}" + response);
             runObligations(response);
             // update necessary because someone could be holding this object and the status is changed!
             response = updateSession(response);
