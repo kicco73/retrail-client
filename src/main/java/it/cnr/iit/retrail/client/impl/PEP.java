@@ -98,7 +98,7 @@ public class PEP extends Server implements PEPInterface {
         Document doc = (Document) client.execute(uconInterfaceName+".tryAccess", params);
         log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
         PepSession response = newPepSession(doc);
-        if (response.getStatus() == Status.TRY) {
+        if (response.getStatus() != Status.END) { // FIXME was == TRY
             updateSession(response);
         }
         log.info("TRYACCESS 4 got {}, obligations {}", response, response.getObligations());
@@ -129,7 +129,7 @@ public class PEP extends Server implements PEPInterface {
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
         sessionNameByCustomId.remove(s.getCustomId());
         sessions.remove(s.getUuid());
-        s.setStatus(Status.DELETED);
+        s.setStatus(Status.END); // FIXME was DELETED
     }
 
     /**
