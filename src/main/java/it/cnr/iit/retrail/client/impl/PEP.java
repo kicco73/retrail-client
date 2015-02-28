@@ -11,7 +11,7 @@ import it.cnr.iit.retrail.commons.impl.PepRequest;
 import it.cnr.iit.retrail.commons.impl.PepResponse;
 import it.cnr.iit.retrail.commons.impl.PepSession;
 import it.cnr.iit.retrail.commons.Server;
-import it.cnr.iit.retrail.commons.Status;
+import it.cnr.iit.retrail.commons.StateType;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -98,7 +98,7 @@ public class PEP extends Server implements PEPInterface {
         Document doc = (Document) client.execute(uconInterfaceName+".tryAccess", params);
         //log.info("TRYACCESS got Y {}", DomUtils.toString(doc));
         PepSession response = newPepSession(doc);
-        if (response.getStatus() != Status.END) { // FIXME was == TRY
+        if (response.getStateType() != StateType.END) { // FIXME was == TRY
             updateSession(response);
         }
         //log.info("TRYACCESS got {}, obligations {}", response, response.getObligations());
@@ -129,7 +129,7 @@ public class PEP extends Server implements PEPInterface {
     private void removeSession(PepSession s) throws IllegalAccessException, InvocationTargetException {
         sessionNameByCustomId.remove(s.getCustomId());
         sessions.remove(s.getUuid());
-        s.setStatus(Status.END); // FIXME was DELETED
+        s.setStateType(StateType.END); // FIXME was DELETED (btw: is it still needed in v2.0? try without)
     }
 
     /**
@@ -176,7 +176,7 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized void onRecoverAccess(PepSession session) throws Exception {
         log.warn("" + session);
-        if (session.getStatus() != Status.REVOKED && shouldRecoverAccess(session)) {
+        if (session.getStateType() != StateType.REVOKED && shouldRecoverAccess(session)) {
             log.warn("recovering " + session);
             updateSession(session);
         } else {
