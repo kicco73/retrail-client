@@ -176,7 +176,7 @@ public class PEP extends Server implements PEPInterface {
     @Override
     public final synchronized void onRecoverAccess(PepSession session) throws Exception {
         log.warn("" + session);
-        if (session.getStateType() != StateType.REVOKED && shouldRecoverAccess(session)) {
+        if (shouldRecoverAccess(session)) {
             log.warn("recovering " + session);
             updateSession(session);
         } else {
