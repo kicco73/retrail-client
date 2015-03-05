@@ -166,44 +166,6 @@ public interface PEPInterface extends RecorderInterface {
      * but not null.
      */
     Collection<PepSession> getSessions();
-     
-    /**
-     * setAccessRecoverableByDefault()
-     * 
-     * sets the property that allows to choose if orphaned sessions are to be 
-     * ended automatically, or handled manually. 
-     * If the PEP is for some reason restarted, all open sessions by the
-     * previous instance of the PEP in the UCon counterpart still remain open.
-     * These are notified by the UCon as soon as the heartbeat with the same
-     * endpoint is re-established. Once this has happened, the PEP is notified
-     * of the orphaned sessions and for each of them may decide to recover it
-     * or not.
-     * 
-     * @param accessRecoverableByDefault true if orphaned sessions are to be
-     * re-established by default, false otherwise. In the latter case, endAccess
-     * is called automatically. If true, it's also advisable to overload the
-     * onRecoverAccess() method to handle further actions.
-     */
-    void setAccessRecoverableByDefault(boolean accessRecoverableByDefault);
-    
-    /**
-     * isAccessRecoverableByDefault()
-     * 
-     * returns true if orphaned sessions are to be re-established by default,
-     * false to terminate them. In the latter case, endAccess
-     * is called automatically by the default onRecoverAccess() handler. 
-     * If the PEP is for some reason restarted, all open sessions by the
-     * previous instance of the PEP in the UCon counterpart still remain open.
-     * These are notified by the UCon as soon as the heartbeat with the same
-     * endpoint is re-established. Once this has happened, the PEP is notified
-     * of the orphaned sessions and for each of them may decide to recover it
-     * or not.
-     * It's recommended to overload the onRecoverAccess() method to perform 
-     * further customized actions. 
-     * 
-     * @return true if the orphaned sessions will be recovered, false otherwise.
-     */
-    boolean isAccessRecoverableByDefault();
     
     /**
      * Run all the obligations attached to the current session. 

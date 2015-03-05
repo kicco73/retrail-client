@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ public class PEP extends Server implements PEPInterface {
     protected final Map<String, PepSession> sessions;
     protected final Map<String, String> sessionNameByCustomId;
     private final String uconInterfaceName;
-    private boolean accessRecoverableByDefault;
     private boolean heartbeat = false;
 
     /**
@@ -48,7 +46,6 @@ public class PEP extends Server implements PEPInterface {
      */
     public PEP(URL pdpUrl, URL myUrl) throws Exception {
         super(myUrl, PEPProtocolProxy.class, "PEP");
-        accessRecoverableByDefault = false;
         client = new Client(pdpUrl);
         sessions = new HashMap<>();
         sessionNameByCustomId = new HashMap<>();
@@ -182,26 +179,13 @@ public class PEP extends Server implements PEPInterface {
     }
 
     @Override
-    public final synchronized void onRecoverAccess(PepSession session) throws Exception {
-        log.warn("" + session);
-        if (shouldRecoverAccess(session)) {
-            log.warn("recovering " + session);
-            updateSession(session);
-        } else {
-            log.warn("discarding " + session);
-            endAccess(session);
-        }
-    }
-
-    protected boolean shouldRecoverAccess(PepSession session) {
-        log.warn("defaults to " + isAccessRecoverableByDefault());
-        return isAccessRecoverableByDefault();
+    public synchronized void onRecoverAccess(PepSession session) throws Exception {
+        log.info("recovered " + session);
     }
 
     @Override
     public synchronized void onRevokeAccess(PepSession session) throws Exception {
-        log.warn("calling endAccess for {}", session);
-        endAccess(session);
+        log.warn("revoked {}", session);
     }
 
     @Override
@@ -275,16 +259,6 @@ public class PEP extends Server implements PEPInterface {
         return (Node) client.execute(uconInterfaceName+".echo", params);
     }
 
-    @Override
-    public boolean isAccessRecoverableByDefault() {
-        return accessRecoverableByDefault;
-    }
-
-    @Override
-    public void setAccessRecoverableByDefault(boolean accessRecoverableByDefault) {
-        this.accessRecoverableByDefault = accessRecoverableByDefault;
-    }
-
     protected PepSession newPepSession(Document d) throws Exception {
         return new PepSession(d);
     }
@@ -318,6 +292,7 @@ public class PEP extends Server implements PEPInterface {
                     onRevokeAccess(pepSession);
                 } else {
                     log.warn("recovering " + pepSession);
+                    //pepSession = updateSession(pepSession);
                     onRecoverAccess(pepSession);
                 }
             }
