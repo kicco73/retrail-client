@@ -1,6 +1,6 @@
 /*
  * CNR - IIT
- * Coded by: 2014 Enrico "KMcC;) Carniani
+ * Coded by: 2014-2015 Enrico "KMcC;) Carniani
  */
 
 package it.cnr.iit.retrail.client;
@@ -64,6 +64,7 @@ public interface PEPInterface extends RecorderInterface {
      * declares that the resource is going to be really accessed from now on.
      * The Usage Control System may still deny the access.
      * Calling tryAccess is mandatory before starting the actual access.
+     * Deprecated: use apply() conveniently with actionName = "startAccess".
      * 
      * @param session the access session returned by tryAccess.
      * @return the updated PEP session, with its own UCon decision.
@@ -71,8 +72,12 @@ public interface PEPInterface extends RecorderInterface {
      * the decisions of the UCon about the request, but it's an actual error
      * of the framework.
      */
+    
+    @Deprecated
     PepSession startAccess(PepSession session) throws Exception;
 
+    PepSession apply(PepSession session, String actionName, Object ...args) throws Exception;
+    
     /**
      * endAccess()
      * 

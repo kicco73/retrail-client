@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -141,17 +142,20 @@ public class PEP extends Server implements PEPInterface {
         return sessions.values();
     }
 
-    public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
+    public final synchronized PepSession apply(String actionName, String uuid, String customId, Object[] args) throws Exception {
         log.debug("uuid={}, customId={}", uuid, customId);
-        Object[] params = new Object[]{uuid, customId};
-        Document doc = (Document) client.execute(uconInterfaceName+".startAccess", params);
+        Object[] params = new Object[]{actionName, uuid, customId, args};
+        Document doc = (Document) client.execute(uconInterfaceName+".apply", params);
         PepSession response = newPepSession(doc);
-        //log.info("STARTACCESS GOT: {} OBLIGATIONS: {}", response, response.getObligations());
-        //log.info("STARTACCESS {}", DomUtils.toString(doc));
         runObligations(response);
         return updateSession(response);
     }
-
+    
+    @Override
+    public final synchronized PepSession apply(PepSession session, String actionName, Object...args) throws Exception {
+        session = apply(actionName, session.getUuid(), session.getCustomId(), args);
+        return updateSession(session);
+    }
     public final synchronized PepSession assignCustomId(String uuid, String customId, String newCustomId) throws Exception {
         log.debug("uuid={}, customId={}, newCustomId={}", uuid, customId, newCustomId);
         Object[] params = new Object[]{uuid, customId, newCustomId};
@@ -167,10 +171,14 @@ public class PEP extends Server implements PEPInterface {
         return response;
     }
 
+    public final synchronized PepSession startAccess(String uuid, String customId) throws Exception {
+        PepSession session = apply("startAccess", uuid, customId, new Object[]{});
+        return updateSession(session);
+    }
+
     @Override
     public final synchronized PepSession startAccess(PepSession session) throws Exception {
-        session = startAccess(session.getUuid(), session.getCustomId());
-        return updateSession(session);
+        return startAccess(session.getUuid(), session.getCustomId());
     }
 
     @Override
@@ -369,4 +377,5 @@ public class PEP extends Server implements PEPInterface {
             stopRecording();
         super.term();
     }
+
 }
