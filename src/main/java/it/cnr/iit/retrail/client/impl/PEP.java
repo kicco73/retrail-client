@@ -31,7 +31,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class PEP extends Server implements PEPInterface {
-
+    public final static int version = 2;
+    
     protected final Client client;
     protected final Map<String, PepSession> sessions;
     protected final Map<String, String> sessionNameByCustomId;
@@ -278,6 +279,9 @@ public class PEP extends Server implements PEPInterface {
             NodeList configs = doc.getElementsByTagNameNS("*", "Config");
             if (configs.getLength() > 0) {
                 Element config = (Element) configs.item(0);
+                int serverVersion = Integer.parseInt(config.getAttribute("version"));
+                if(serverVersion > version)
+                    throw new RuntimeException("Server is v"+serverVersion+", while we are v"+version+": client needs to be updated");
                 setWatchdogPeriod(Integer.parseInt(config.getAttribute("watchdogPeriod")));
             }
             NodeList sessionList = doc.getElementsByTagNameNS("*", "Response");
