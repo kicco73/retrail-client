@@ -50,7 +50,7 @@ public class PEPMediator implements PEPProtocol {
     @Override
     public synchronized List<Node> revokeAccess(List<Node> sessions) throws Exception {
         for (Node session: sessions) {
-            log.warn("received revocation: {}", DomUtils.toString(session));
+            //log.warn("received revocation: {}", DomUtils.toString(session));
             PepSession pepSession = new PepSession((Document) session);
             // TODO: uconUrl ignored for now, assuming only one pdp.
             URL uconUrl = pepSession.getUconUrl();
@@ -74,7 +74,7 @@ public class PEPMediator implements PEPProtocol {
                 log.error("UNEXISTENT SESSION: " + pepSession);
             }
         }
-        log.warn("revocation done");
+        log.info("revocation done");
         return null;
     }
 

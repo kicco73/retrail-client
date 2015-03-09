@@ -22,13 +22,11 @@ public class PEPProtocolProxy implements PEPProtocol {
 
     @Override
     public List<Node> revokeAccess(List<Node> pepSessions) throws Exception {
-        log.warn("{}", pepSessions);
         return mediator.revokeAccess(pepSessions);
     }
 
     @Override
     public List<Node> runObligations(List<Node> pepSessions) throws Exception {
-        log.warn("{}", pepSessions);
         return mediator.runObligations(pepSessions);
     }
 }
